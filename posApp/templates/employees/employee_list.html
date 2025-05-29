@@ -1,0 +1,145 @@
+{% extends 'posApp/base.html' %}
+
+{% block title %}Users Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-users me-2"></i>
+        Users Management
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        {% comment %}
+        <!-- Uncomment when you create the user_create URL and view -->
+        <a href="{% url 'user_create' %}" class="btn btn-primary btn-custom">
+            <i class="fas fa-plus me-2"></i>Add New User
+        </a>
+        {% endcomment %}
+        <button class="btn btn-primary btn-custom" onclick="alert('Add User functionality coming soon!')">
+            <i class="fas fa-plus me-2"></i>Add New User
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Date Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_obj in page_obj %}
+                    <tr>
+                        <td>
+                            <strong>{{ user_obj.username }}</strong>
+                            {% if user_obj.is_superuser %}
+                                <span class="badge bg-danger ms-1">Super Admin</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user_obj.get_full_name|default:"-" }}</td>
+                        <td>{{ user_obj.email|default:"-" }}</td>
+                        <td>
+                            {% if user_obj.userrole %}
+                                <span class="badge bg-info">{{ user_obj.userrole.get_role_display }}</span>
+                            {% elif user_obj.is_superuser %}
+                                <span class="badge bg-danger">Super Admin</span>
+                            {% elif user_obj.is_staff %}
+                                <span class="badge bg-warning">Staff</span>
+                            {% else %}
+                                <span class="badge bg-secondary">User</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user_obj.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user_obj.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                {% comment %}
+                                <!-- Uncomment when you create the user_edit and user_delete URLs -->
+                                <a href="{% url 'user_edit' user_obj.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if not user_obj.is_superuser %}
+                                <a href="{% url 'user_delete' user_obj.id %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                                {% endcomment %}
+                                
+                                <!-- Temporary buttons until URLs are created -->
+                                <button class="btn btn-sm btn-outline-primary" onclick="alert('Edit user: {{ user_obj.username }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                {% if not user_obj.is_superuser %}
+                                <button class="btn btn-sm btn-outline-danger" onclick="alert('Delete user: {{ user_obj.username }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No users found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Users pagination">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

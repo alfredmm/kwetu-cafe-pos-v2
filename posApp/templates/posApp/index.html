@@ -1,0 +1,688 @@
+{% extends "posApp/base.html" %} 
+{% load humanize %} 
+{% block pageContent %}
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card" style="
+         background-color: white;
+         outline: 2px solid #f59042;
+         border: 1px solid black;
+        ">
+        <div class="d-flex justify-content-between">
+            <h4 class="card-title mb-0" style="font-weight: bold;">ADMIN DASHBOARD - ANALYTICS</h4>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <hr class="w-100">
+</div>
+
+<!-- Dashboard Stats Cards -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
+    <div class="mdc-card info-card info-card--success">
+        <div class="card-inner">
+            <h5 class="card-title">Categories</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ categories|intcomma }}</h5>
+            <p class="tx-12">Over All Count of Categories</p>
+            <div class="card-icon-wrapper">
+                <i class="material-icons">list</i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
+    <div class="mdc-card info-card info-card--primary">
+        <div class="card-inner">
+            <h5 class="card-title">Products</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ products|intcomma }}</h5>
+            <p class="tx-12">Over All Count of Products</p>
+            <div class="card-icon-wrapper">
+                <i class="material-icons">label</i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
+    <div class="mdc-card info-card info-card--info">
+        <div class="card-inner">
+            <h5 class="card-title">Today's Transactions</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ transaction|intcomma }}</h5>
+            <p class="tx-12">Over All Count of Today's Transactions</p>
+            <div class="card-icon-wrapper">
+                <i class="material-icons">receipt</i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
+    <div class="mdc-card info-card info-card--warning">
+        <div class="card-inner">
+            <h5 class="card-title">Today's Sales</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ total_sales|intcomma }}</h5>
+            <p class="tx-12">Total Sales Today</p>
+            <div class="card-icon-wrapper">
+                <i class="mdi mdi-cash-multiple"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<<<<<<< HEAD:posApp/templates/posApp/home.html
+
+<!-- Charts Section Starts Here -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2" style="
+         background-color: white;
+         outline: 2px solid #f59042;
+         border: 1px solid black;
+        ">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0"style="font-weight: bold;">SALES ANALYTICS</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Date Filter Controls -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card p-3">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="year_filter">Year</label>
+                    <select id="year_filter" class="form-control">
+                        <!-- Will be populated via JavaScript -->
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="month_filter">Month</label>
+                    <select id="month_filter" class="form-control">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button id="apply_filter" class="btn btn-primary form-control">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Summary Card -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card info-card info-card--primary">
+        <div class="card-inner text-center">
+            <h5 class="card-title">Monthly Sales Summary</h5>
+            <h3 id="total_month_sales" class="font-weight-light text-white mb-2">
+                ${{ total_month_sales|floatformat:2|default:"0.00" }}
+            </h3>
+            <p class="tx-12 text-white-50">Total sales for selected month</p>
+            <div class="row mt-3">
+                <div class="col-6">
+                    <h6 class="text-white-75">Average Daily</h6>
+                    <h5 id="avg_daily_sales" class="text-white">$0.00</h5>
+                </div>
+                <div class="col-6">
+                    <h6 class="text-white-75">Best Sales Day</h6>
+                    <h5 id="best_sales_day" class="text-white">-</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Daily Sales Line Chart -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12" style="outline: 2px solid grey; ">
+    <div class="mdc-card mb-3">
+        <div class="d-flex justify-content-between align-items-center p-3">
+            <h5 class="card-title mb-0">Daily Sales Trend</h5>
+            <div class="text-right">
+                <span class="badge badge-primary" id="sales_trend_indicator">Loading...</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="daily_chart_loading" class="text-center py-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2 ">Loading chart data...</p>
+            </div>
+            <canvas id="dailySalesChart" height="auto"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Top 10 Selling Items and Sales by Category -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-6">
+    <div class="mdc-card mb-3">
+        <div class="d-flex justify-content-between align-items-center p-3">
+            <h5 class="card-title mb-0">Top 10 Selling Products</h5>
+            <span class="badge badge-success" id="top_products_count">0 products</span>
+        </div>
+        <div class="card-body">
+            <div id="products_chart_loading" class="text-center py-4" style="display: none;">
+                <div class="spinner-border text-success" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2  ">Loading products...</p>
+            </div>
+            <canvas id="topProductsChart" height="auto"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-6">
+    <div class="mdc-card mb-3">
+        <div class="d-flex justify-content-between align-items-center p-3">
+            <h5 class="card-title mb-0">Sales by Category</h5>
+            <span class="badge badge-info" id="categories_count">0 categories</span>
+        </div>
+        <div class="card-body">
+            <div id="category_chart_loading" class="text-center py-4" style="display: none;">
+                <div class="spinner-border text-info" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2  ">Loading categories...</p>
+            </div>
+            <canvas id="categorySalesChart" height="auto"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Analytics Cards -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-4">
+    <div class="mdc-card info-card info-card--success">
+        <div class="card-inner">
+            <h6 class="card-title">Total Transactions</h6>
+            <h4 id="total_transactions" class="font-weight-light text-white">0</h4>
+            <p class="tx-12 text-white-50">This month</p>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-4">
+    <div class="mdc-card info-card info-card--warning">
+        <div class="card-inner">
+            <h6 class="card-title">Items Sold</h6>
+            <h4 id="total_items_sold" class="font-weight-light text-white">0</h4>
+            <p class="tx-12 text-white-50">Total quantity</p>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-4">
+    <div class="mdc-card info-card info-card--info">
+        <div class="card-inner">
+            <h6 class="card-title">Avg. Transaction</h6>
+            <h4 id="avg_transaction_value" class="font-weight-light text-white">$0.00</h4>
+            <p class="tx-12 text-white-50">Per transaction</p>
+        </div>
+    </div>
+</div>
+
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<!-- Include Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+    /* Add the improved styling from the second template */
+    .info-card {
+        background: linear-gradient(135deg, darkgrey 0%, #f59042 100%);
+        color: black;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .info-card .orange {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .info-card .green {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .info-card .purple {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    .card-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+    
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+    // Global chart objects
+    let dailySalesChart;
+    let topProductsChart;
+    let categorySalesChart;
+    
+    // Color palettes for charts
+   const backgroundColors = [
+    'rgba(0, 0, 255, 0.6)',        // Blue
+    'rgba(255, 0, 0, 0.6)',         // Red
+    'rgba(204, 204, 0, 0.6)',      // Dark Yellow
+    'rgba(139, 0, 0, 0.6)',         // Dark Red
+    'rgba(0, 0, 139, 0.6)',         // Dark Blue
+    'rgba(255, 215, 0, 0.6)',       // Gold (brighter yellow)
+    'rgba(100, 149, 237, 0.6)',     // Cornflower Blue
+    'rgba(178, 34, 34, 0.6)',       // Firebrick (red variant)
+    'rgba(65, 105, 225, 0.6)',      // Royal Blue
+    'rgba(184, 134, 11, 0.6)'       // Dark Goldenrod (dark yellow)
+];
+    
+    const borderColors = [
+        'rgb(54, 162, 235)',
+        'rgb(255, 99, 132)',
+        'rgb(75, 192, 192)',
+        'rgb(255, 159, 64)',
+        'rgb(153, 102, 255)',
+        'rgb(255, 205, 86)',
+        'rgb(201, 203, 207)',
+        'rgb(255, 99, 71)',
+        'rgb(50, 205, 50)',
+        'rgb(138, 43, 226)'
+    ];
+
+    // Populate years dropdown (current year and 5 years back)
+    function populateYears() {
+        const yearFilter = document.getElementById('year_filter');
+        const currentYear = new Date().getFullYear();
+        
+        // Clear existing options
+        yearFilter.innerHTML = '';
+        
+        // Start from 5 years back
+        for (let year = currentYear - 5; year <= currentYear; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            if (year === {{ current_year|default:"new Date().getFullYear()" }}) {
+                option.selected = true;
+            }
+            yearFilter.appendChild(option);
+        }
+    }
+    
+    // Format currency
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2
+        }).format(value);
+    }
+    
+    // Show loading indicators
+    function showLoading() {
+        document.getElementById('daily_chart_loading').style.display = 'block';
+        document.getElementById('products_chart_loading').style.display = 'block';
+        document.getElementById('category_chart_loading').style.display = 'block';
+        document.getElementById('sales_trend_indicator').textContent = 'Loading...';
+    }
+    
+    // Hide loading indicators
+    function hideLoading() {
+        document.getElementById('daily_chart_loading').style.display = 'none';
+        document.getElementById('products_chart_loading').style.display = 'none';
+        document.getElementById('category_chart_loading').style.display = 'none';
+    }
+    
+    // Initialize charts
+    function initCharts() {
+        // Set current month in dropdown
+        const currentMonth = {{ current_month|default:"new Date().getMonth() + 1" }};
+        document.getElementById('month_filter').value = currentMonth;
+        
+        // Load initial data
+        fetchAndUpdateCharts();
+        
+        // Add event listener for filter button
+        document.getElementById('apply_filter').addEventListener('click', fetchAndUpdateCharts);
+    }
+    
+    // Fetch data and update all charts
+    function fetchAndUpdateCharts() {
+        const year = document.getElementById('year_filter').value;
+        const month = document.getElementById('month_filter').value;
+        
+        showLoading();
+        
+        // Use jQuery AJAX if available, otherwise fetch
+        if (typeof $ !== 'undefined') {
+            $.ajax({
+                url: "{% url 'get-chart-data' %}",
+                method: "GET",
+                data: {
+                    year: year,
+                    month: month
+                },
+                dataType: "json",
+                error: function(err) {
+                    console.log(err);
+                    hideLoading();
+                    if (typeof alert_toast === 'function') {
+                        alert_toast("An error occurred while fetching chart data.", 'error');
+                    } else {
+                        alert("An error occurred while fetching chart data.");
+                    }
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp !== null) {
+                        updateAllCharts(resp);
+                        hideLoading();
+                    } else {
+                        hideLoading();
+                        if (typeof alert_toast === 'function') {
+                            alert_toast("Invalid response from server.", 'error');
+                        }
+                    }
+                }
+            });
+        } else {
+            // Fallback to fetch API
+            fetch(`{% url 'get-chart-data' %}?year=${year}&month=${month}`)
+                .then(response => response.json())
+                .then(resp => {
+                    updateAllCharts(resp);
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    hideLoading();
+                    alert("An error occurred while fetching chart data.");
+                });
+        }
+    }
+    
+    // Update all charts and summary data
+    function updateAllCharts(resp) {
+        // Update total sales display
+        document.getElementById('total_month_sales').textContent = formatCurrency(resp.total_month_sales);
+        
+        // Update summary statistics
+        updateSummaryStats(resp);
+        
+        // Update all charts
+        updateDailySalesChart(resp.daily_sales);
+        updateTopProductsChart(resp.top_products);
+        updateCategorySalesChart(resp.category_sales);
+        
+        // Update badges
+        document.getElementById('top_products_count').textContent = resp.top_products.length + ' products';
+        document.getElementById('categories_count').textContent = resp.category_sales.length + ' categories';
+    }
+    
+    // Update summary statistics
+    function updateSummaryStats(data) {
+        const dailySales = data.daily_sales;
+        const totalSales = dailySales.reduce((sum, day) => sum + day.total, 0);
+        const daysWithSales = dailySales.filter(day => day.total > 0).length;
+        const avgDailySales = daysWithSales > 0 ? totalSales / daysWithSales : 0;
+        
+        // Find best sales day
+        let bestDay = dailySales.reduce((max, day) => day.total > max.total ? day : max, dailySales[0] || {day: 0, total: 0});
+        
+        // Calculate additional stats
+        const totalItems = data.top_products.reduce((sum, product) => sum + product.qty, 0);
+        const totalTransactions = data.daily_sales.filter(day => day.total > 0).length; // Simplified
+        const avgTransactionValue = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+        
+        // Update displays
+        document.getElementById('avg_daily_sales').textContent = formatCurrency(avgDailySales);
+        document.getElementById('best_sales_day').textContent = bestDay.total > 0 ? 
+            `Day ${bestDay.day}` : 'No sales';
+        document.getElementById('total_transactions').textContent = totalTransactions;
+        document.getElementById('total_items_sold').textContent = totalItems.toLocaleString();
+        document.getElementById('avg_transaction_value').textContent = formatCurrency(avgTransactionValue);
+        
+        // Update trend indicator
+        const trend = avgDailySales > 100 ? 'Trending Up' : avgDailySales > 50 ? 'Stable' : 'Needs Attention';
+        document.getElementById('sales_trend_indicator').textContent = trend;
+    }
+    
+    // Update Daily Sales Line Chart
+    function updateDailySalesChart(data) {
+        const ctx = document.getElementById('dailySalesChart').getContext('2d');
+        
+        // Destroy previous chart instance if it exists
+        if (dailySalesChart) {
+            dailySalesChart.destroy();
+        }
+        
+        // Create new chart
+        dailySalesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(item => `Day ${item.day}`),
+                datasets: [{
+                    label: 'Daily Sales Total',
+                    data: data.map(item => item.total),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Sales: ' + formatCurrency(context.raw);
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                }
+            }
+        });
+    }
+    
+    // Update Top Products Bar Chart
+    function updateTopProductsChart(data) {
+    const ctx = document.getElementById('topProductsChart').getContext('2d');
+    
+    // Destroy previous chart instance if it exists
+    if (topProductsChart) {
+        topProductsChart.destroy();
+    }
+    
+    // Truncate long product names
+    const labels = data.map(item => 
+        item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name
+    );
+    
+    // Create new chart with compact bars
+    topProductsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Items Sold',
+                data: data.map(item => item.qty),
+                backgroundColor: backgroundColors.slice(0, data.length),
+                borderColor: borderColors.slice(0, data.length),
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y', // Horizontal bars
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantity Sold'
+                    },
+                    grid: {
+                        display: false // Remove x-axis grid lines
+                    }
+                },
+                y: {
+                    ticks: {
+                        maxTicksLimit: 10
+                    },
+                    grid: {
+                        display: false // Remove y-axis grid lines
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false, // Hide legend
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return data[context[0].dataIndex].name;
+                        },
+                        afterLabel: function(context) {
+                            const index = context.dataIndex;
+                            return 'Revenue: ' + formatCurrency(data[index].total);
+                        }
+                    }
+                }
+            },
+            // 🔥 KEY CHANGES TO MAKE BARS COMPACT:
+            barPercentage: 0.9,       // Bars take 90% of available space
+            categoryPercentage: 0.8   // Categories take 80% of available space
+        }
+    });
+}
+    // Update Category Sales Chart
+    function updateCategorySalesChart(data) {
+    const ctx = document.getElementById('categorySalesChart').getContext('2d');
+    
+    if (categorySalesChart) {
+        categorySalesChart.destroy();
+    }
+    
+    categorySalesChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: data.map(item => item.name),
+            datasets: [{
+                data: data.map(item => item.count),
+                backgroundColor: backgroundColors.slice(0, data.length),
+                borderColor: borderColors.slice(0, data.length),
+                borderWidth: 2,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%', // Makes the doughnut hole larger (more compact)
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 10, // Reduced padding
+                        usePointStyle: true,
+                        boxWidth: 10 // Smaller legend items
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const index = context.dataIndex;
+                            const total = data.reduce((a, b) => a + b.count, 0);
+                            const percentage = total > 0 ? (data[index].count / total * 100).toFixed(1) : 0;
+                            return `${percentage}% of total`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+    // Run when document is ready
+    $(document).ready(function() {
+        populateYears();
+        initCharts();
+    });
+</script>
+{% endblock ScriptBlock %}
+=======
+{% endblock pageContent %}
+>>>>>>> 46404cd7b74a725cba32e0daf22ebd6f27ce76aa:posApp/templates/posApp/index.html

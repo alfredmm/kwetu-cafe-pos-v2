@@ -1,0 +1,71 @@
+{% load static %}
+<!-- partial:partials/_sidebar.html -->
+<aside class="mdc-drawer mdc-drawer--dismissible mdc-drawer--open bg-dark bg-gradient">
+    <div class="mdc-drawer__header border-bottom border-light"
+    style="
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;    
+    ">
+        <img src="{% static 'images/kwetu-cafe-logo.PNG' %}" alt="logo" 
+        style="
+            width:140px; 
+            text-align:center;
+            ">
+    </div>
+    <div class="mdc-drawer__content">
+        <div class="mdc-list-group">
+            <nav class="mdc-list mdc-drawer-menu">
+                <div class="mdc-list-item mdc-drawer-item">
+                    <a class="mdc-drawer-link" href="{% url 'home-page' %}">
+                        <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">home</i> Dashboard
+                    </a>
+                </div>
+                <div class="mdc-list-item mdc-drawer-item">
+                    <a class="mdc-drawer-link" href="{% url 'category-page' %}">
+                        <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">list</i> Menu Categories
+                    </a>
+                </div>
+                <div class="mdc-list-item mdc-drawer-item">
+                    <a class="mdc-drawer-link" href="{% url 'product-page' %}">
+                        <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">label</i> Meal List
+                    </a>
+                </div>
+                <div class="mdc-list-item mdc-drawer-item">
+                    <a class="mdc-drawer-link" href="{% url 'pos-page' %}">
+                        <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">payment</i> Make Order
+                    </a>
+                </div>
+                <div class="mdc-list-item mdc-drawer-item">
+                    <a class="mdc-drawer-link" href="{% url 'sales-page' %}">
+                        <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">receipt</i> Sales
+                    </a>
+                </div>
+                {% if show_admin_menu %}
+                            <hr class="text-white-50">
+                            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-white-50">
+                                Management
+                            </h6>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'user_list' %}">
+                                    <i class="fas fa-users me-2"></i>
+                                    Users
+                                </a>
+                            </li>
+                            <!--
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'employee_list' %}">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    Employees
+                                </a>
+                            </li>
+                            -->
+                        {% endif %}
+            </nav>
+        </div>
+    </div>
+</aside> 
+<!-- partial -->
+ 
