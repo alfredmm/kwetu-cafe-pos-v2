@@ -4,49 +4,48 @@
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="card-title mb-0">Menu Categories</h4>
             <div class="text-start">
-                <button class="btn btn-primary bg-gradient btn-sm rounded-0" id="create_new"><i class="mdi mdi-plus"></i><span> Add New</span></button>
+                <button class="btn btn-primary bg-gradient btn-sm rounded-pill px-4" id="create_new">
+                    <i class="mdi mdi-plus me-2"></i><span>Add New</span>
+                </button>
             </div>
         </div>
     </div>
 </div>
-<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 mt-3">
     <div class="mdc-card">
         <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <colgroup>
-                    <col width="5%">
-                    <col width="30%">
-                    <col width="30%">
-                    <col width="15%">
-                    <col width="20%">
-                </colgroup>
+            <table class="table table-hover table-bordered">
                 <thead>
-                    <tr>
-                        <th class="text-center py-1">#</th>
-                        <th class="text-center py-1">Category Name</th>
-                        <th class="text-center py-1">Description</th>
-                        <th class="text-center py-1">Status</th>
-                        <th class="text-center py-1">Action</th>
+                    <tr class="bg-light">
+                        <th class="text-center">#</th>
+                        <th class="text-center">Category Name</th>
+                        <th class="text-center">Description</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for cat in category %}
                     <tr>
-                        <td class="px-2 py-1 text-center">{{ cat.id }}</td>
-                        <td class="px-2 py-1 text-start">{{ cat.name }}</td>
-                        <td class="px-2 py-1 text-start">{{ cat.description }}</td>
-                        <td class="px-2 py-1 text-center">
+                        <td class="text-center">{{ cat.id }}</td>
+                        <td class="text-start">{{ cat.name }}</td>
+                        <td class="text-start">{{ cat.description }}</td>
+                        <td class="text-center">
                             {% if cat.status == 1 %}
-                            <span class="badge bg-primary rounded-pill px-3">Active</span> {% else %}
-                            <span class="badge bg-secondary rounded-pill px-3">Inactive</span> {% endif %}
+                            <span class="badge bg-success rounded-pill px-3">Active</span>
+                            {% else %}
+                            <span class="badge bg-danger rounded-pill px-3">Inactive</span>
+                            {% endif %}
                         </td>
-                        <td class="px-2 py-1 text-center">
-                            <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--light mdc-ripple-upgraded edit-data" type="button" data-id="{{ cat.pk }}" title="Edit">
-                                <i class="material-icons mdc-button__icon">edit</i>
-                            </button>
-                            <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--danger mdc-ripple-upgraded delete-data" type="button" data-id="{{ cat.pk }}" title="Delete">
-                                <i class="material-icons mdc-button__icon">deleteoutline</i>
-                            </button>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-warning btn-sm edit-data" type="button" data-id="{{ cat.pk }}" title="Edit">
+                                    <i class="mdi mdi-pencil"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm delete-data" type="button" data-id="{{ cat.pk }}" title="Delete">
+                                    <i class="mdi mdi-delete"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -55,7 +54,9 @@
         </div>
     </div>
 </div>
-{% endblock pageContent %} {% block ScriptBlock %}
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
 <script>
     $(function() {
         $('#create_new').click(function() {
@@ -65,7 +66,7 @@
             uni_modal("Edit Category", "{% url 'manage_category-page' %}?id=" + $(this).attr('data-id'))
         })
         $('.delete-data').click(function() {
-            _conf("Are you sure to delete this Category?", "delete_category", [$(this).attr('data-id')])
+            _conf("Are you sure you want to delete this Category?", "delete_category", [$(this).attr('data-id')])
         })
     })
 
@@ -83,14 +84,14 @@
             dataType: "json",
             error: err => {
                 console.log(err)
-                alert_toast("An error occured.", 'error');
+                alert_toast("An error occurred.", 'error');
                 end_loader();
             },
             success: function(resp) {
                 if (typeof resp == 'object' && resp.status == 'success') {
                     location.reload();
                 } else {
-                    alert_toast("An error occured.", 'error');
+                    alert_toast("An error occurred.", 'error');
                     end_loader();
                 }
             }

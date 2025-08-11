@@ -51,3 +51,21 @@ body {
     width: 100px !important;
     height: 100% !important;    
 }
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-image: url("../images/login-cover.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.auth-form {
+  background-color: rgba(255, 255, 255, 0.9); /* optional white overlay */
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 100%;
+}

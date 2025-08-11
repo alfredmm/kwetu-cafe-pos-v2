@@ -3,73 +3,98 @@
     <div class="mdc-card py-2">
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="card-title mb-0">Product List</h4>
-            <div class="text-start">
-                <button class="btn btn-primary bg-gradient btn-sm rounded-0" id="create_new"><i class="mdi mdi-plus"></i><span> Add New</span></button>
+            <div class="d-flex align-items-center">
+                <div class="input-group me-3">
+                    <input type="text" class="form-control" id="product_search" placeholder="Search for products..." aria-label="Search">
+                    <button class="btn btn-outline-secondary" type="button" id="search_button"><i class="mdi mdi-magnify"></i></button>
+                </div>
+                <button class="btn btn-primary bg-gradient btn-sm rounded-pill px-4" id="create_new">
+                    <i class="mdi mdi-plus me-2"></i><span>Add New</span>
+                </button>
             </div>
         </div>
     </div>
 </div>
-<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-    <div class="mdc-card">
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <colgroup>
-                    <col width="5%">
-                    <col width="20%">
-                    <col width="20%">
-                    <col width="25%">
-                    <col width="15%">
-                    <col width="15%">
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th class="text-center py-1">#</th>
-                        <th class="text-center py-1">Category</th>
-                        <th class="text-center py-1">Product</th>
-                        <th class="text-center py-1">Description</th>
-                        <th class="text-center py-1">Status</th>
-                        <th class="text-center py-1">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in products %}
-                    <tr>
-                        <td class="px-2 py-1 text-center">{{ product.id }}</td>
-                        <td class="px-2 py-1 text-start">{{ product.category_id }}</td>
-                        <td class="px-2 py-1 text-start">{{ product.code }} - {{ product.name }}</td>
-                        <td class="px-2 py-1 text-start">{{ product.description }}</td>
-                        <td class="px-2 py-1 text-center">
-                            {% if product.status == 1 %}
-                            <span class="badge bg-primary rounded-pill px-3">Active</span> {% else %}
-                            <span class="badge bg-secondary rounded-pill px-3">Inactive</span> {% endif %}
-                        </td>
-                        <td class="px-2 py-1 text-center">
-                            <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--light mdc-ripple-upgraded edit-data" type="button" data-id="{{ product.pk }}" title="Edit">
-                                <i class="material-icons mdc-button__icon">edit</i>
-                            </button>
-                            <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--danger mdc-ripple-upgraded delete-data" type="button" data-id="{{ product.pk }}" title="Delete">
-                                <i class="material-icons mdc-button__icon">deleteoutline</i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 mt-3">
+    <div class="mdc-card p-3">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="product-list-container">
+            {% for product in products %}
+            <div class="col product-item" data-name="{{ product.name }}" data-category="{{ product.category_id.name }}" data-code="{{ product.code }}">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-container">
+                        {% if product.category_id.name == 'Drinks' %}
+                        <img src="https://source.unsplash.com/random/400x250/?drinks" class="card-img-top" alt="Product Image">
+                        {% elif product.category_id.name == 'Food' %}
+                        <img src="https://source.unsplash.com/random/400x250/?food" class="card-img-top" alt="Product Image">
+                        {% elif product.category_id.name == 'Snacks' %}
+                        <img src="https://source.unsplash.com/random/400x250/?snacks" class="card-img-top" alt="Product Image">
+                        {% else %}
+                        <img src="https://source.unsplash.com/random/400x250/?products" class="card-img-top" alt="Product Image">
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1 fw-bold">{{ product.name }}</h5>
+                        <small class="text-muted mb-2">{{ product.code }} | {{ product.category_id.name }}</small>
+                        <p class="card-text text-truncate">{{ product.description }}</p>
+                        <div class="mt-auto">
+                            <span class="badge {% if product.status == 1 %}bg-success{% else %}bg-danger{% endif %} rounded-pill px-3 py-2 fw-normal mb-3">
+                                {% if product.status == 1 %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top d-flex justify-content-end">
+                        <button class="btn btn-warning btn-sm edit-data me-2" type="button" data-id="{{ product.pk }}" title="Edit">
+                            <i class="mdi mdi-pencil"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-data" type="button" data-id="{{ product.pk }}" title="Delete">
+                            <i class="mdi mdi-delete"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted py-5">
+                <p>No products found.</p>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
-{% endblock pageContent %} {% block ScriptBlock %}
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
 <script>
     $(function() {
         $('#create_new').click(function() {
             uni_modal("Add New Product", "{% url 'manage_products-page' %}")
-        })
-        $('.edit-data').click(function() {
-            uni_modal("Edit Product", "{% url 'manage_products-page' %}?id=" + $(this).attr('data-id'))
-        })
-        $('.delete-data').click(function() {
-            _conf("Are you sure to delete this Product?", "delete_product", [$(this).attr('data-id')])
-        })
+        });
+
+        // Search functionality
+        $('#product_search').on('keyup', function() {
+            let searchTerm = $(this).val().toLowerCase();
+            $('.product-item').each(function() {
+                let card = $(this);
+                let productName = card.data('name').toLowerCase();
+                let productCategory = card.data('category').toLowerCase();
+                let productCode = card.data('code').toLowerCase();
+
+                if (productName.includes(searchTerm) || productCategory.includes(searchTerm) || productCode.includes(searchTerm)) {
+                    card.show();
+                } else {
+                    card.hide();
+                }
+            });
+        });
+
+        // Event delegation for dynamically created buttons
+        $(document).on('click', '.edit-data', function() {
+            uni_modal("Edit Product", "{% url 'manage_products-page' %}?id=" + $(this).data('id'))
+        });
+
+        $(document).on('click', '.delete-data', function() {
+            _conf("Are you sure you want to delete this Product?", "delete_product", [$(this).data('id')])
+        });
 
         $('#uni_modal').on('shown.bs.modal', function() {
             $('#category_id').select2({
@@ -77,8 +102,8 @@
                 width: '100%',
                 dropdownParent: $('#uni_modal')
             })
-        })
-    })
+        });
+    });
 
     function delete_product($id) {
         start_loader();
@@ -94,14 +119,14 @@
             dataType: "json",
             error: err => {
                 console.log(err)
-                alert_toast("An error occured.", 'error');
+                alert_toast("An error occurred.", 'error');
                 end_loader();
             },
             success: function(resp) {
                 if (typeof resp == 'object' && resp.status == 'success') {
                     location.reload();
                 } else {
-                    alert_toast("An error occured.", 'error');
+                    alert_toast("An error occurred.", 'error');
                     end_loader();
                 }
             }
@@ -109,3 +134,41 @@
     }
 </script>
 {% endblock ScriptBlock %}
+
+{% block custom_style %}
+<style>
+    .card-img-container {
+        height: 150px;
+        overflow: hidden;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    .card-img-top {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    .card-title {
+        color: #333;
+    }
+    .card-text {
+        color: #666;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .card {
+        border-radius: 18px;
+        transition: box-shadow 0.3s ease-in-out, border 0.3s ease-in-out;
+        border: 2px solid #e4cb0a; /* Added a subtle border */
+    }
+    .card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-color: #bdbdbd; /* Slightly darker border on hover for emphasis */
+    }
+</style>
+{% endblock custom_style %}

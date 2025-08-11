@@ -22169,7 +22169,7 @@ address p {
 
 .mdc-card.info-card.info-card--success .card-inner .card-icon-wrapper {
   background-color: #00b67a;
-  box-shadow: 0 0 10px 5px rgba(0, 182, 122, 0.35);
+  box-shadow: 0 0 10px 5px rgba(0, 102, 145, 0.35);
 }
 
 .mdc-card.info-card.info-card--warning .card-inner .card-icon-wrapper {
@@ -22967,7 +22967,7 @@ address p {
 .mdc-drawer .mdc-drawer__content .mdc-drawer-menu .mdc-drawer-item .mdc-drawer-link .mdc-drawer-arrow {
   margin-left: auto;
   font-size: 1.25rem;
-  transition: all .3s ease;
+  transition: all .4s ease;
 }
 
 .mdc-drawer .mdc-drawer__content .mdc-drawer-menu .mdc-drawer-item .mdc-expansion-panel-link .mdc-drawer-arrow.expanded,
