@@ -1,2 +1,2 @@
-release python manage.py migrate
-web: gunicorn pos.wsgi --log-file=-
+release: python manage.py migrate --no-input && python manage.py collectstatic --no-input
+web: gunicorn pos.wsgi --log-file -
