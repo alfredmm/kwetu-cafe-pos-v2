@@ -66,7 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'posApp.views.user_role_context',
+                'posApp.context_processors.user_role_context',
             ],
         },
     },
