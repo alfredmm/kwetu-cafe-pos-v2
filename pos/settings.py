@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-#ALLOWED_HOSTS = ['kwetu-cafe-pos-27038f509873.herokuapp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['kwetu-cafe-pos-27038f509873.herokuapp.com', 'localhost', '127.0.0.1']
 
 # Application definition
 
