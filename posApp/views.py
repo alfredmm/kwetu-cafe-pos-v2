@@ -70,6 +70,7 @@ def login_user(request):
             if user.is_active:
                 login(request, user)
                 resp['status']='success'
+                resp['redirect_url'] = '/'
             else:
                 resp['msg'] = "Incorrect username or password"
         else:
