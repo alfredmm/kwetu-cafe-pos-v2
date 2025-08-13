@@ -16,6 +16,7 @@ import calendar
 from django.db.models.functions import TruncDay, ExtractDay
 from collections import defaultdict
 from .forms import UserForm
+from .context_processors import get_user_role, user_role_context  # Add any other functions you need
 
 
 # This works when forms.py is in the same app
