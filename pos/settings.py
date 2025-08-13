@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['kwetu-cafe-pos-27038f509873.herokuapp.com', 'localhost', '127.0.0.1']
+#ALLOWED_HOSTS = ['kwetu-cafe-pos-27038f509873.herokuapp.com', 'localhost', '127.0.0.1']
 
 # Application definition
 
@@ -58,7 +58,7 @@ ROOT_URLCONF = 'pos.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'posApp' / 'templates'],  # Add your templates directory here
+        #'DIRS': [BASE_DIR / 'posApp' / 'templates'],  # Add your templates directory here
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -66,7 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                #'posApp.context_processors.user_role_context',
+                'posApp.context_processors.user_role_context',
             ],
         },
     },
