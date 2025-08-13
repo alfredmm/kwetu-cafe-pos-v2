@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure--w(dug*va_megpa25w$gmv8o6+f8!fg_*m1^u$)z25pab0hicm'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['kwetu-cafe-pos.herokuapp.com']
+ALLOWED_HOSTS = ['kwetu-cafe-pos-27038f509873.herokuapp.com', 'localhost', '127.0.0.1']
 
 # Application definition
 
@@ -139,11 +139,12 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 django_heroku.settings(locals())
 
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),  # Keep this if you have a global static folder
-    os.path.join(BASE_DIR, 'posApp'),  # This will include posApp/assets/
+    #os.path.join(BASE_DIR, 'posApp'),  # This will include posApp/assets/
 ]
+# Add WhiteNoise storage for better static file serving
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
