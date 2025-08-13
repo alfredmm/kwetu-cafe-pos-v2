@@ -77,23 +77,14 @@ WSGI_APPLICATION = 'pos.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default=os.environ.get('DATABASE_URL'),
-#         conn_max_age=600,  # Keep database connections open for reuse
-#         ssl_require=True   # Force SSL for secure database connections
-#     )
-# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'd7e9ni43c4r7d9',      # Name of your new PostgreSQL database
-        'USER': 'u85ui8h20p53me',        # Your PostgreSQL username
-        'PASSWORD': 'ped096d58996c3880668c45f4d17d17e7fd1237147a11b1cea39a437c44ce5606',  # Your PostgreSQL password
-        'HOST': 'c7itisjfjj8ril.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com',                  # Or the IP address of your database server
-        'PORT': '5432',                       # Default PostgreSQL port
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,  # Keep database connections open for reuse
+        #ssl_require=True   # Force SSL for secure database connections
+    )
 }
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
