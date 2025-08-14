@@ -27,6 +27,24 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Force HTTPS
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Security headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Cookie security
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+
 ALLOWED_HOSTS = ['kwetu-cafe-pos-27038f509873.herokuapp.com', 'localhost', '127.0.0.1']
 
 # Application definition
