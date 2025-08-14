@@ -17,6 +17,7 @@ from django.db.models.functions import TruncDay, ExtractDay
 from collections import defaultdict
 from .forms import UserForm
 from .context_processors import get_user_role, user_role_context  # Add any other functions you need
+from django.core.paginator import Paginator
 
 
 # This works when forms.py is in the same app
@@ -575,11 +576,9 @@ def save_pos(request):
 # Sales Management Views
 @login_required
 def salesList(request):
-    """Sales list view - accessible to managers and admins"""
     if not is_admin_or_manager(request.user):
         return redirect('pos')
-    
-    sales = Sales.objects.all()
+    sales = Sales.objects.all().order_by('-date_added')
     sale_data = []
     for sale in sales:
         data = {}
@@ -591,14 +590,16 @@ def salesList(request):
         if 'tax_amount' in data:
             data['tax_amount'] = format(float(data['tax_amount']),'.2f')
         sale_data.append(data)
-    
+    paginator = Paginator(sale_data, 20)  # 20 per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
         'page_title':'Sales Transactions',
-        'sale_data':sale_data,
+        'sale_data':page_obj,
         'user_role': get_user_role(request.user),
     }
     return render(request, 'posApp/sales.html', context)
-
+    
 @login_required
 def receipt(request):
     id = request.GET.get('id')
