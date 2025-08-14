@@ -1,58 +1,72 @@
-{% extends "posApp/base.html" %} 
-{% load humanize %} 
+{% extends "posApp/base.html" %}
+{% load humanize %}
 
 {% block pageContent %}
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-    <div class="mdc-card py-2">
-        <div class="d-flex justify-content-between align-items-center">
-            <h4 class="card-title mb-0">Sales List</h4>
+    <div class="stats-cards">
+        <div class="stat-card gradient-blue">
+            <div class="stat-icon"><i class="mdi mdi-cart-outline"></i></div>
+            <div class="stat-info">
+                <h5>Total Sales</h5>
+                <h3>{{ total_sales|intcomma }}</h3>
+            </div>
+        </div>
+        <div class="stat-card gradient-green">
+            <div class="stat-icon"><i class="mdi mdi-cash-multiple"></i></div>
+            <div class="stat-info">
+                <h5>Total Revenue</h5>
+                <h3>{{ total_revenue|intcomma }}</h3>
+            </div>
+        </div>
+        <div class="stat-card gradient-orange">
+            <div class="stat-icon"><i class="mdi mdi-package-variant-closed"></i></div>
+            <div class="stat-info">
+                <h5>Items Sold</h5>
+                <h3>{{ total_items|intcomma }}</h3>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-    <div class="mdc-card">
+    <div class="mdc-card py-2 d-flex justify-content-between align-items-center card-header-modern">
+        <h4 class="card-title mb-0"><i class="mdi mdi-format-list-bulleted-square"></i> Sales List</h4>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card modern-card">
         <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered" id="sales-list-table">
-                <colgroup>
-                    <col width="5%">
-                    <col width="5%">
-                    <col width="20%">
-                    <col width="20%">
-                    <col width="25%">
-                    <col width="15%">
-                    <col width="15%">
-                    <col width="15%">
-                </colgroup>
+            <table class="table table-hover table-striped" id="sales-list-table">
                 <thead>
-                    <tr class="bg-primary text-white">
-                        <th class="text-center py-1">#</th>
-                        <th class="text-center py-1"><i class="mdi mdi-receipt"></i></th>
-                        <th class="text-center py-1">DateTime</th>
-                        <th class="text-center py-1">Trans. Code</th>
-                        <th class="text-center py-1">Total</th>
-                        <th class="text-center py-1">Tax Inclusive</th>
-                        <th class="text-center py-1">Items</th>
-                        <th class="text-center py-1">Action</th>
+                    <tr>
+                        <th>#</th>
+                        <th><i class="mdi mdi-receipt"></i></th>
+                        <th>DateTime</th>
+                        <th>Trans. Code</th>
+                        <th>Total</th>
+                        <th>Tax Inclusive</th>
+                        <th>Items</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sale in sale_data %}
                     <tr class="sale-row" data-id="{{ sale.id }}">
-                        <td class="px-2 py-1 text-center">{{ forloop.counter }}</td>
-                        <td class="px-2 py-1 text-center"><i class="mdi mdi-receipt-outline mdi-24px text-primary"></i></td>
-                        <td class="px-2 py-1 text-start">{{ sale.date_added|date:'Y-m-d H:i' }}</td>
-                        <td class="px-2 py-1 text-start fw-bold">{{ sale.code }}</td>
-                        <td class="px-2 py-1 text-end">{{ sale.grand_total|intcomma }}</td>
-                        <td class="px-2 py-1 text-end">({{ sale.tax }}%) {{ sale.tax_amount|intcomma:2 }}</td>
-                        <td class="px-2 py-1 text-center">{{ sale.item_count|intcomma }}</td>
-                        <td class="px-2 py-1 text-center">
-                            <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--light mdc-ripple-upgraded view-data" type="button" data-id="{{ sale.id }}" title="View Receipt">
-                                <i class="material-icons mdc-button__icon">receipt</i>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="text-center"><i class="mdi mdi-receipt-outline mdi-24px text-primary"></i></td>
+                        <td>{{ sale.date_added|date:'Y-m-d H:i' }}</td>
+                        <td class="fw-bold">{{ sale.code }}</td>
+                        <td class="text-end">{{ sale.grand_total|intcomma }}</td>
+                        <td class="text-end">({{ sale.tax }}%) {{ sale.tax_amount|intcomma:2 }}</td>
+                        <td class="text-center">{{ sale.item_count|intcomma }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-info view-data" data-id="{{ sale.id }}">
+                                <i class="mdi mdi-eye"></i>
                             </button>
                             {% if user_role == 'admin' or user_role == 'manager' %}
-                            <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--danger mdc-ripple-upgraded delete-data" type="button" data-id="{{ sale.id }}" data-code="{{ sale.code }}" title="Delete">
-                                <i class="material-icons mdc-button__icon">deleteoutline</i>
+                            <button class="btn btn-sm btn-danger delete-data" data-id="{{ sale.id }}" data-code="{{ sale.code }}">
+                                <i class="mdi mdi-delete"></i>
                             </button>
                             {% endif %}
                         </td>
@@ -63,50 +77,36 @@
         </div>
     </div>
 </div>
-
-{% endblock pageContent %} 
+{% endblock pageContent %}
 
 {% block ScriptBlock %}
 <script>
     $(function() {
-        // Initialize DataTable
         $('#sales-list-table').DataTable({
-            "order": [[ 0, "desc" ]] // Order by the first column (the counter) in descending order
+            "order": [[ 0, "desc" ]]
         });
 
         $('.view-data').click(function() {
-            uni_modal("Transaction's Receipt", "{% url 'receipt-modal' %}?id=" + $(this).attr('data-id'));
+            uni_modal("Transaction's Receipt", "{% url 'receipt-modal' %}?id=" + $(this).data('id'));
         });
         
         $('.delete-data').click(function() {
-            _conf("Are you sure you want to delete the transaction record <b>" + $(this).attr('data-code') + "</b>?", "delete_sale", [$(this).attr('data-id')]);
+            _conf("Delete transaction <b>" + $(this).data('code') + "</b>?", "delete_sale", [$(this).data('id')]);
         });
     });
 
     function delete_sale($id) {
         start_loader();
         $.ajax({
-            headers: {
-                "X-CSRFToken": '{{csrf_token}}'
-            },
+            headers: { "X-CSRFToken": '{{csrf_token}}' },
             url: "{% url 'delete-sale' %}",
             method: "POST",
-            data: {
-                id: $id
-            },
+            data: { id: $id },
             dataType: "json",
-            error: err => {
-                console.log(err);
-                alert_toast("An error occurred.", 'error');
-                end_loader();
-            },
             success: function(resp) {
-                if (typeof resp == 'object' && resp.status == 'success') {
-                    location.reload();
-                } else {
-                    alert_toast("An error occurred.", 'error');
-                    end_loader();
-                }
+                if (resp.status == 'success') location.reload();
+                else alert_toast("An error occurred.", 'error');
+                end_loader();
             }
         });
     }
@@ -114,32 +114,59 @@
 {% endblock ScriptBlock %}
 
 <style>
-    /* Custom Styles for improved UI */
-    .mdc-card .card-title {
-        font-weight: 600;
-        font-size: 1.25rem;
-    }
-    .table thead th {
-        vertical-align: middle;
-        text-align: center;
-        background-color: #0d6efd; /* A modern blue for the header */
-        color: white;
-    }
-    .table tbody tr:hover {
-        background-color: #f1f1f1;
-        cursor: pointer;
-    }
-    .sale-row td {
-        vertical-align: middle;
-    }
-    .mdi-receipt-outline {
-        font-size: 24px;
-        color: #0d6efd;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-        background-color: #0d6efd !important;
-        color: white !important;
-        border: 1px solid #0d6efd !important;
-    }
+/* Modern Stat Cards */
+.stats-cards {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.stat-card {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+    padding: 1rem;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.stat-icon {
+    font-size: 2.5rem;
+    margin-right: 1rem;
+}
+.stat-info h5 {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 0.3rem;
+}
+.stat-info h3 {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+.gradient-blue { background: linear-gradient(135deg, #4f8ef7, #1e64d4); }
+.gradient-green { background: linear-gradient(135deg, #28a745, #218838); }
+.gradient-orange { background: linear-gradient(135deg, #fd7e14, #e8590c); }
+
+/* Modern Table */
+.modern-card {
+    border-radius: 12px;
+    padding: 1rem;
+}
+.table thead {
+    background: #0d6efd;
+    color: white;
+    font-weight: 600;
+}
+.table tbody tr:hover {
+    background-color: #f5f9ff;
+    transform: scale(1.002);
+    transition: 0.2s ease;
+}
+.btn {
+    border-radius: 8px;
+}
+.card-header-modern {
+    border-radius: 12px 12px 0 0;
+    padding: 1rem;
+    background: #f8f9fa;
+}
 </style>
