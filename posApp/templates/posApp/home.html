@@ -149,7 +149,7 @@
 </div>
 
 <!-- Daily Sales Line Chart -->
-<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12" style="outline: 2px solid grey;">
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12" style="outline: 2px solid grey; ">
     <div class="mdc-card mb-3">
         <div class="d-flex justify-content-between align-items-center p-3">
             <h5 class="card-title mb-0">Daily Sales Trend</h5>
@@ -164,7 +164,7 @@
                 </div>
                 <p class="mt-2 text-muted">Loading chart data...</p>
             </div>
-            <canvas id="dailySalesChart"></canvas>
+            <canvas id="dailySalesChart" height="auto"></canvas>
         </div>
     </div>
 </div>
@@ -183,7 +183,7 @@
                 </div>
                 <p class="mt-2 text-muted">Loading products...</p>
             </div>
-            <canvas id="topProductsChart"></canvas>
+            <canvas id="topProductsChart" height="auto"></canvas>
         </div>
     </div>
 </div>
@@ -201,7 +201,7 @@
                 </div>
                 <p class="mt-2 text-muted">Loading categories...</p>
             </div>
-            <canvas id="categorySalesChart"></canvas>
+            <canvas id="categorySalesChart" height="auto"></canvas>
         </div>
     </div>
 </div>
@@ -244,12 +244,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
     .info-card {
-        background: linear-gradient(135deg, #fffbe6 0%, #ffe5b4 100%);
-        color: #222;
+        background: linear-gradient(135deg, darkgrey 0%, #b8c52f 100%);
+        color: black;
         border-radius: 15px;
         padding: 20px;
         margin-bottom: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         transition: transform 0.3s ease;
     }
     .info-card--success {
@@ -302,5 +302,395 @@
         .info-card { padding: 12px 4px 10px 4px; }
     }
 </style>
-{{ block.super }}
+
+<script>
+    // Global chart objects
+    let dailySalesChart;
+    let topProductsChart;
+    let categorySalesChart;
+    
+    // Color palettes for charts
+   const backgroundColors = [
+    'rgba(0, 0, 255, 0.6)',        // Blue
+    'rgba(255, 0, 0, 0.6)',         // Red
+    'rgba(204, 204, 0, 0.6)',      // Dark Yellow
+    'rgba(139, 0, 0, 0.6)',         // Dark Red
+    'rgba(0, 0, 139, 0.6)',         // Dark Blue
+    'rgba(255, 215, 0, 0.6)',       // Gold (brighter yellow)
+    'rgba(100, 149, 237, 0.6)',     // Cornflower Blue
+    'rgba(178, 34, 34, 0.6)',       // Firebrick (red variant)
+    'rgba(65, 105, 225, 0.6)',      // Royal Blue
+    'rgba(184, 134, 11, 0.6)'       // Dark Goldenrod (dark yellow)
+];
+    
+    const borderColors = [
+        'rgb(54, 162, 235)',
+        'rgb(255, 99, 132)',
+        'rgb(75, 192, 192)',
+        'rgb(255, 159, 64)',
+        'rgb(153, 102, 255)',
+        'rgb(255, 205, 86)',
+        'rgb(201, 203, 207)',
+        'rgb(255, 99, 71)',
+        'rgb(50, 205, 50)',
+        'rgb(138, 43, 226)'
+    ];
+
+    // Populate years dropdown (current year and 5 years back)
+    function populateYears() {
+        const yearFilter = document.getElementById('year_filter');
+        const currentYear = new Date().getFullYear();
+        
+        // Clear existing options
+        yearFilter.innerHTML = '';
+        
+        // Start from 5 years back
+        for (let year = currentYear - 5; year <= currentYear; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            if (year === currentYear) {
+                option.selected = true;
+            }
+            yearFilter.appendChild(option);
+        }
+    }
+    
+    // Format currency
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2
+        }).format(value);
+    }
+    
+    // Show loading indicators
+    function showLoading() {
+        document.getElementById('daily_chart_loading').style.display = 'block';
+        document.getElementById('products_chart_loading').style.display = 'block';
+        document.getElementById('category_chart_loading').style.display = 'block';
+        document.getElementById('sales_trend_indicator').textContent = 'Loading...';
+    }
+    
+    // Hide loading indicators
+    function hideLoading() {
+        document.getElementById('daily_chart_loading').style.display = 'none';
+        document.getElementById('products_chart_loading').style.display = 'none';
+        document.getElementById('category_chart_loading').style.display = 'none';
+    }
+    
+    // Initialize charts
+    function initCharts() {
+        // Set current month in dropdown
+        const currentMonth = new Date().getMonth() + 1;
+        document.getElementById('month_filter').value = currentMonth;
+        
+        // Load initial data
+        fetchAndUpdateCharts();
+        
+        // Add event listener for filter button
+        document.getElementById('apply_filter').addEventListener('click', fetchAndUpdateCharts);
+    }
+    
+    // Fetch data and update all charts
+    function fetchAndUpdateCharts() {
+        const year = document.getElementById('year_filter').value;
+        const month = document.getElementById('month_filter').value;
+        
+        showLoading();
+        
+        // Use jQuery AJAX if available, otherwise fetch
+        if (typeof $ !== 'undefined') {
+            $.ajax({
+                url: "{% url 'get-chart-data' %}",
+                method: "GET",
+                data: {
+                    year: year,
+                    month: month
+                },
+                dataType: "json",
+                error: function(err) {
+                    console.log(err);
+                    hideLoading();
+                    if (typeof alert_toast === 'function') {
+                        alert_toast("An error occurred while fetching chart data.", 'error');
+                    } else {
+                        alert("An error occurred while fetching chart data.");
+                    }
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp !== null) {
+                        updateAllCharts(resp);
+                        hideLoading();
+                    } else {
+                        hideLoading();
+                        if (typeof alert_toast === 'function') {
+                            alert_toast("Invalid response from server.", 'error');
+                        }
+                    }
+                }
+            });
+        } else {
+            // Fallback to fetch API
+            fetch(`{% url 'get-chart-data' %}?year=${year}&month=${month}`)
+                .then(response => response.json())
+                .then(resp => {
+                    updateAllCharts(resp);
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    hideLoading();
+                    alert("An error occurred while fetching chart data.");
+                });
+        }
+    }
+    
+    // Update all charts and summary data
+    function updateAllCharts(resp) {
+        // Update total sales display
+        document.getElementById('total_month_sales').textContent = formatCurrency(resp.total_month_sales);
+        
+        // Update summary statistics
+        updateSummaryStats(resp);
+        
+        // Update all charts
+        updateDailySalesChart(resp.daily_sales);
+        updateTopProductsChart(resp.top_products);
+        updateCategorySalesChart(resp.category_sales);
+        
+        // Update badges
+        document.getElementById('top_products_count').textContent = resp.top_products.length + ' products';
+        document.getElementById('categories_count').textContent = resp.category_sales.length + ' categories';
+    }
+    
+    // Update summary statistics
+    function updateSummaryStats(data) {
+        const dailySales = data.daily_sales;
+        const totalSales = dailySales.reduce((sum, day) => sum + day.total, 0);
+        const daysWithSales = dailySales.filter(day => day.total > 0).length;
+        const avgDailySales = daysWithSales > 0 ? totalSales / daysWithSales : 0;
+        
+        // Find best sales day
+        let bestDay = dailySales.reduce((max, day) => day.total > max.total ? day : max, dailySales[0] || {day: 0, total: 0});
+        
+        // Calculate additional stats
+        const totalItems = data.top_products.reduce((sum, product) => sum + product.qty, 0);
+        const totalTransactions = data.daily_sales.filter(day => day.total > 0).length; // Simplified
+        const avgTransactionValue = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+        
+        // Update displays
+        document.getElementById('avg_daily_sales').textContent = formatCurrency(avgDailySales);
+        document.getElementById('best_sales_day').textContent = bestDay.total > 0 ? 
+            `Day ${bestDay.day}` : 'No sales';
+        document.getElementById('total_transactions').textContent = totalTransactions;
+        document.getElementById('total_items_sold').textContent = totalItems.toLocaleString();
+        document.getElementById('avg_transaction_value').textContent = formatCurrency(avgTransactionValue);
+        
+        // Update trend indicator
+        const trend = avgDailySales > 100 ? 'Trending Up' : avgDailySales > 50 ? 'Stable' : 'Needs Attention';
+        document.getElementById('sales_trend_indicator').textContent = trend;
+    }
+    
+    // Update Daily Sales Line Chart
+    function updateDailySalesChart(data) {
+        const ctx = document.getElementById('dailySalesChart').getContext('2d');
+        
+        // Destroy previous chart instance if it exists
+        if (dailySalesChart) {
+            dailySalesChart.destroy();
+        }
+        
+        // Create new chart
+        dailySalesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(item => `Day ${item.day}`),
+                datasets: [{
+                    label: 'Daily Sales Total',
+                    data: data.map(item => item.total),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Sales: ' + formatCurrency(context.raw);
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                }
+            }
+        });
+    }
+    
+    // Update Top Products Bar Chart
+    function updateTopProductsChart(data) {
+    const ctx = document.getElementById('topProductsChart').getContext('2d');
+    
+    // Destroy previous chart instance if it exists
+    if (topProductsChart) {
+        topProductsChart.destroy();
+    }
+    
+    // Truncate long product names
+    const labels = data.map(item => 
+        item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name
+    );
+    
+    // Create new chart with compact bars
+    topProductsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Items Sold',
+                data: data.map(item => item.qty),
+                backgroundColor: backgroundColors.slice(0, data.length),
+                borderColor: borderColors.slice(0, data.length),
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y', // Horizontal bars
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantity Sold'
+                    },
+                    grid: {
+                        display: false // Remove x-axis grid lines
+                    }
+                },
+                y: {
+                    ticks: {
+                        maxTicksLimit: 10
+                    },
+                    grid: {
+                        display: false // Remove y-axis grid lines
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false, // Hide legend
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return data[context[0].dataIndex].name;
+                        },
+                        afterLabel: function(context) {
+                            const index = context.dataIndex;
+                            return 'Revenue: ' + formatCurrency(data[index].total);
+                        }
+                    }
+                }
+            },
+            // 🔥 KEY CHANGES TO MAKE BARS COMPACT:
+            barPercentage: 0.9,       // Bars take 90% of available space
+            categoryPercentage: 0.8   // Categories take 80% of available space
+        }
+    });
+}
+    // Update Category Sales Chart
+    function updateCategorySalesChart(data) {
+    const ctx = document.getElementById('categorySalesChart').getContext('2d');
+    
+    if (categorySalesChart) {
+        categorySalesChart.destroy();
+    }
+    
+    categorySalesChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: data.map(item => item.name),
+            datasets: [{
+                data: data.map(item => item.count),
+                backgroundColor: backgroundColors.slice(0, data.length),
+                borderColor: borderColors.slice(0, data.length),
+                borderWidth: 2,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%', // Makes the doughnut hole larger (more compact)
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 10, // Reduced padding
+                        usePointStyle: true,
+                        boxWidth: 10 // Smaller legend items
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const index = context.dataIndex;
+                            const total = data.reduce((a, b) => a + b.count, 0);
+                            const percentage = total > 0 ? (data[index].count / total * 100).toFixed(1) : 0;
+                            return `${percentage}% of total`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+    // Run when document is ready
+    $(document).ready(function() {
+        populateYears();
+        initCharts();
+    });
+</script>
 {% endblock ScriptBlock %}
