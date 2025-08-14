@@ -99,7 +99,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
         conn_max_age=600,  # Keep database connections open for reuse
-        #ssl_require=True   # Force SSL for secure database connections
+        ssl_require=True   # Force SSL for secure database connections
     )
 }
 
