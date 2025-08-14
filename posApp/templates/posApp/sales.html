@@ -1,6 +1,6 @@
 {% extends "posApp/base.html" %} {% load humanize %} {% block pageContent %}
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-    <div class="mdc-card py-2" style="text-align:center; font-size: large; font-weight: bold;">
+    <div class="mdc-card py-2">
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="card-title mb-0">Sales List</h4>
         </div>
@@ -9,40 +9,37 @@
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
     <div class="mdc-card">
         <div class="table-responsive">
-            <table class="table table-striped table-bordered align-middle">
+            <table class="table table-striped table-bordered">
                 <colgroup>
                     <col width="5%">
                     <col width="20%">
                     <col width="20%">
                     <col width="25%">
                     <col width="15%">
-                    <col width="10%">
-                    <col style="width: 60px;"> <!-- Action column compact -->
+                    <col width="15%">
+                    <col style="width: 60px;">
                 </colgroup>
-                <thead class="table-dark">
+                <thead>
                     <tr>
-                        <th class="text-center py-2">#</th>
-                        <th class="text-center py-2">DateTime</th>
-                        <th class="text-center py-2">Trans. Code</th>
-                        <th class="text-center py-2">Total</th>
-                        <th class="text-center py-2">Tax Inclusive</th>
-                        <th class="text-center py-2">Items</th>
-                        <th class="text-center py-2">Action</th>
+                        <th class="text-center py-1">#</th>
+                        <th class="text-center py-1">DateTime</th>
+                        <th class="text-center py-1">Trans. Code</th>
+                        <th class="text-center py-1">Total</th>
+                        <th class="text-center py-1">Tax Inclusive</th>
+                        <th class="text-center py-1">Items</th>
+                        <th class="text-center py-1">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sale in sale_data %}
                     <tr>
-                        <td class="px-2 py-2 text-center fw-bold">{{ sale.id }}</td>
-                        <td class="px-2 py-2 text-start">{{ sale.date_added|date:'Y-m-d H:i' }}</td>
-                        <td class="px-2 py-2 text-start text-primary">{{ sale.code }}</td>
-                        <td class="px-2 py-2 text-end text-success fw-semibold">{{ sale.grand_total|intcomma }}</td>
-                        <td class="px-2 py-2 text-end">
-                            <span class="badge bg-info text-dark">({{ sale.tax }}%)</span>
-                            <span class="ms-1">{{ sale.tax_amount|intcomma:2 }}</span>
-                        </td>
-                        <td class="px-2 py-2 text-center">{{ sale.item_count|intcomma }}</td>
-                        <td class="px-2 py-2 text-center" style="width:60px; min-width:60px;">
+                        <td class="px-2 py-1 text-center">{{ sale.id }}</td>
+                        <td class="px-2 py-1 text-start">{{ sale.date_added|date:'Y-m-d H:i' }}</td>
+                        <td class="px-2 py-1 text-start">{{ sale.code }}</td>
+                        <td class="px-2 py-1 text-end">{{ sale.grand_total|intcomma }}</td>
+                        <td class="px-2 py-1 text-end">({{ sale.tax }}%) {{ sale.tax_amount|intcomma:2 }}</td>
+                        <td class="px-2 py-1 text-center">{{ sale.item_count|intcomma }}</td>
+                        <td class="px-2 py-1 text-center" style="width:60px; min-width:60px;">
                             <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--light mdc-ripple-upgraded view-data" type="button" data-id="{{ sale.id }}" title="View Receipt">
                                 <i class="material-icons mdc-button__icon">receipt</i>
                             </button>
@@ -51,25 +48,56 @@
                             </button>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-3">No sales found.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if sale_data.has_other_pages %}
+        <nav aria-label="Sales pagination">
+            <ul class="pagination justify-content-center my-3">
+                {% if sale_data.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ sale_data.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </span>
+                </li>
+                {% endif %}
+                {% for num in sale_data.paginator.page_range %}
+                    {% if sale_data.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > sale_data.number|add:'-3' and num < sale_data.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if sale_data.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ sale_data.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
     </div>
 </div>
 <style>
-.table thead th {
-    vertical-align: middle;
-    background: #343a40;
-    color: #fff;
-    border-bottom: 2px solid #dee2e6;
-    font-size: 1rem;
-    letter-spacing: 0.03em;
-}
-.table-hover tbody tr:hover, .table-striped tbody tr:hover {
-    background-color: #f1f3f5;
-    transition: background 0.2s;
-}
 .icon-button {
     min-width: 32px;
     min-height: 32px;
