@@ -40,20 +40,20 @@
             <table class="table table-hover table-striped" id="sales-list-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th><i class="mdi mdi-receipt"></i></th>
-                        <th>DateTime</th>
-                        <th>Trans. Code</th>
-                        <th>Total</th>
-                        <th>Tax Inclusive</th>
-                        <th>Items</th>
-                        <th>Action</th>
+                        <th class="text-center">#</th>
+                        <th class="text-center"><i class="mdi mdi-receipt"></i></th>
+                        <th class="text-center">DateTime</th>
+                        <th class="text-center">Trans. Code</th>
+                        <th class="text-center">Total</th>
+                        <th class="text-center">Tax Inclusive</th>
+                        <th class="text-center">Items</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sale in sale_data %}
                     <tr class="sale-row" data-id="{{ sale.id }}">
-                        <td>{{ forloop.counter }}</td>
+                        <td class="text-center">{{ forloop.counter }}</td>
                         <td class="text-center"><i class="mdi mdi-receipt-outline mdi-24px text-primary"></i></td>
                         <td>{{ sale.date_added|date:'Y-m-d H:i' }}</td>
                         <td class="fw-bold">{{ sale.code }}</td>
@@ -61,12 +61,12 @@
                         <td class="text-end">({{ sale.tax }}%) {{ sale.tax_amount|intcomma:2 }}</td>
                         <td class="text-center">{{ sale.item_count|intcomma }}</td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-info view-data" data-id="{{ sale.id }}">
-                                <i class="mdi mdi-eye"></i>
+                            <button class="btn btn-sm btn-info view-data" type="button" data-id="{{ sale.id }}" title="View Receipt">
+                                <i class="material-icons mdc-button__icon">receipt</i>
                             </button>
                             {% if user_role == 'admin' or user_role == 'manager' %}
-                            <button class="btn btn-sm btn-danger delete-data" data-id="{{ sale.id }}" data-code="{{ sale.code }}">
-                                <i class="mdi mdi-delete"></i>
+                            <button class="btn btn-sm btn-danger delete-data" type="button" data-id="{{ sale.id }}" data-code="{{ sale.code }}" title="Delete">
+                                <i class="material-icons mdc-button__icon">delete_outline</i>
                             </button>
                             {% endif %}
                         </td>
@@ -87,11 +87,11 @@
         });
 
         $('.view-data').click(function() {
-            uni_modal("Transaction's Receipt", "{% url 'receipt-modal' %}?id=" + $(this).data('id'));
+            uni_modal("Transaction's Receipt", "{% url 'receipt-modal' %}?id=" + $(this).attr('data-id'));
         });
         
         $('.delete-data').click(function() {
-            _conf("Delete transaction <b>" + $(this).data('code') + "</b>?", "delete_sale", [$(this).data('id')]);
+            _conf("Are you sure you want to delete the transaction record <b>" + $(this).attr('data-code') + "</b>?", "delete_sale", [$(this).attr('data-id')]);
         });
     });
 
@@ -114,7 +114,7 @@
 {% endblock ScriptBlock %}
 
 <style>
-/* Modern Stat Cards */
+/* Stat Cards */
 .stats-cards {
     display: flex;
     gap: 1rem;
@@ -146,7 +146,7 @@
 .gradient-green { background: linear-gradient(135deg, #28a745, #218838); }
 .gradient-orange { background: linear-gradient(135deg, #fd7e14, #e8590c); }
 
-/* Modern Table */
+/* Table Styling */
 .modern-card {
     border-radius: 12px;
     padding: 1rem;
