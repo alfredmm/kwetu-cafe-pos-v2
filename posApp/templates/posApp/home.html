@@ -2,13 +2,14 @@
 {% load humanize %} 
 {% block pageContent %}
 
-<!-- Animated background gradient -->
-<div class="dashboard-bg"></div>
-
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-    <div class="mdc-card dashboard-header-glass">
+    <div class="mdc-card" style="
+         background-color: white;
+         outline: 5px solid #c3a810;
+         border: 1px solid black;
+        ">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title mb-0">🍽️ <span style="font-weight: bold;">ADMIN DASHBOARD - ANALYTICS</span></h4>
+            <h4 class="card-title mb-0" style="font-weight: bold;">ADMIN DASHBOARD - ANALYTICS</h4>
         </div>
     </div>
 </div>
@@ -19,7 +20,7 @@
 
 <!-- Dashboard Stats Cards -->
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
-    <div class="mdc-card info-card info-card--success dashboard-card-animate">
+    <div class="mdc-card info-card info-card--success">
         <div class="card-inner">
             <h5 class="card-title">Categories</h5>
             <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ categories|intcomma }}</h5>
@@ -32,7 +33,7 @@
 </div>
 
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
-    <div class="mdc-card info-card info-card--primary dashboard-card-animate">
+    <div class="mdc-card info-card info-card--primary">
         <div class="card-inner">
             <h5 class="card-title">Products</h5>
             <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ products|intcomma }}</h5>
@@ -45,7 +46,7 @@
 </div>
 
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
-    <div class="mdc-card info-card info-card--info dashboard-card-animate">
+    <div class="mdc-card info-card info-card--info">
         <div class="card-inner">
             <h5 class="card-title">Today's Transactions</h5>
             <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ transaction|intcomma }}</h5>
@@ -58,7 +59,7 @@
 </div>
 
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
-    <div class="mdc-card info-card info-card--warning dashboard-card-animate">
+    <div class="mdc-card info-card info-card--warning">
         <div class="card-inner">
             <h5 class="card-title">Today's Sales</h5>
             <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ total_sales|intcomma }}</h5>
@@ -72,21 +73,27 @@
 
 <!-- Charts Section Starts Here -->
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-    <div class="mdc-card dashboard-header-glass-2">
+    <div class="mdc-card py-2" style="
+         background-color: white;
+         outline: 2px solid #f59042;
+         border: 1px solid black;
+        ">
         <div class="d-flex justify-content-between align-items-center">
-            <h4 class="card-title mb-0">📊 <span style="font-weight: bold;">SALES ANALYTICS</span></h4>
+            <h4 class="card-title mb-0"style="font-weight: bold;">SALES ANALYTICS</h4>
         </div>
     </div>
 </div>
 
 <!-- Date Filter Controls -->
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-    <div class="mdc-card p-3 dashboard-card-animate">
+    <div class="mdc-card p-3">
         <div class="row">
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="year_filter">Year</label>
-                    <select id="year_filter" class="form-control"></select>
+                    <select id="year_filter" class="form-control">
+                        <!-- Will be populated via JavaScript -->
+                    </select>
                 </div>
             </div>
             <div class="col-md-4">
@@ -111,7 +118,7 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label>&nbsp;</label>
-                    <button id="apply_filter" class="btn btn-gradient form-control">Apply Filters</button>
+                    <button id="apply_filter" class="btn btn-primary form-control">Apply Filters</button>
                 </div>
             </div>
         </div>
@@ -120,7 +127,7 @@
 
 <!-- Monthly Summary Card -->
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-    <div class="mdc-card info-card info-card--primary dashboard-card-animate">
+    <div class="mdc-card info-card info-card--primary">
         <div class="card-inner text-center">
             <h5 class="card-title">Monthly Sales Summary</h5>
             <h3 id="total_month_sales" class="font-weight-light text-white mb-2">
@@ -142,7 +149,7 @@
 </div>
 
 <!-- Daily Sales Line Chart -->
-<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12" style="outline: 2px solid grey; ">
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12" style="outline: 2px solid grey;">
     <div class="mdc-card mb-3">
         <div class="d-flex justify-content-between align-items-center p-3">
             <h5 class="card-title mb-0">Daily Sales Trend</h5>
@@ -201,7 +208,7 @@
 
 <!-- Additional Analytics Cards -->
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-4">
-    <div class="mdc-card info-card info-card--success dashboard-card-animate">
+    <div class="mdc-card info-card info-card--success">
         <div class="card-inner">
             <h6 class="card-title">Total Transactions</h6>
             <h4 id="total_transactions" class="font-weight-light text-white">0</h4>
@@ -211,7 +218,7 @@
 </div>
 
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-4">
-    <div class="mdc-card info-card info-card--warning dashboard-card-animate">
+    <div class="mdc-card info-card info-card--warning">
         <div class="card-inner">
             <h6 class="card-title">Items Sold</h6>
             <h4 id="total_items_sold" class="font-weight-light text-white">0</h4>
@@ -221,7 +228,7 @@
 </div>
 
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-4">
-    <div class="mdc-card info-card info-card--info dashboard-card-animate">
+    <div class="mdc-card info-card info-card--info">
         <div class="card-inner">
             <h6 class="card-title">Avg. Transaction</h6>
             <h4 id="avg_transaction_value" class="font-weight-light text-white">$0.00</h4>
@@ -230,155 +237,70 @@
     </div>
 </div>
 
-<!-- Floating restaurant icons animation -->
-<div class="restaurant-anim-icons">
-    <span class="icon-fork">&#127860;</span>
-    <span class="icon-cup">&#9749;</span>
-    <span class="icon-burger">&#127828;</span>
-    <span class="icon-pizza">&#127829;</span>
-    <span class="icon-cake">&#127856;</span>
-</div>
-
 {% endblock pageContent %}
 
 {% block ScriptBlock %}
 <!-- Include Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
-/* Animated background gradient */
-.dashboard-bg {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: 0;
-    background: linear-gradient(120deg, #fffbe6 0%, #ffe5b4 40%, #f7c873 100%);
-    animation: dashboard-bg-move 10s ease-in-out infinite alternate;
-}
-@keyframes dashboard-bg-move {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-}
-
-/* Glass effect for dashboard headers */
-.dashboard-header-glass, .dashboard-header-glass-2 {
-    background: rgba(255,255,255,0.7);
-    border-radius: 18px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
-    border: 1px solid rgba(255,255,255,0.18);
-    margin-bottom: 1rem;
-    position: relative;
-    z-index: 1;
-}
-.dashboard-header-glass-2 {
-    background: rgba(255,255,255,0.85);
-    border: 1.5px solid #f59042;
-}
-
-/* Card gradients for restaurant feel */
-.info-card--success {
-    background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
-    color: #fff;
-}
-.info-card--primary {
-    background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
-    color: #fff;
-}
-.info-card--info {
-    background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-    color: #fff;
-}
-.info-card--warning {
-    background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
-    color: #fff;
-}
-.info-card {
-    border-radius: 18px;
-    padding: 22px 20px 18px 20px;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
-    transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s;
-    position: relative;
-    z-index: 1;
-}
-.info-card:hover {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.18);
-}
-.card-title {
-    font-weight: 700;
-    letter-spacing: 0.02em;
-}
-.card-icon-wrapper {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    font-size: 2.5rem;
-    opacity: 0.12;
-    pointer-events: none;
-}
-.dashboard-card-animate {
-    animation: fadeInUp 1s cubic-bezier(.4,2,.3,1);
-}
-@keyframes fadeInUp {
-    0% { opacity: 0; transform: translateY(40px);}
-    100% { opacity: 1; transform: translateY(0);}
-}
-
-/* Floating restaurant icons animation */
-.restaurant-anim-icons {
-    position: fixed;
-    pointer-events: none;
-    z-index: 2;
-    left: 0; top: 0; width: 100vw; height: 100vh;
-}
-.restaurant-anim-icons span {
-    position: absolute;
-    font-size: 2.2rem;
-    opacity: 0.13;
-    animation: float-restaurant-icons 12s linear infinite;
-}
-.icon-fork { left: 8vw; top: 12vh; animation-delay: 0s;}
-.icon-cup { left: 80vw; top: 18vh; animation-delay: 2s;}
-.icon-burger { left: 50vw; top: 80vh; animation-delay: 4s;}
-.icon-pizza { left: 30vw; top: 60vh; animation-delay: 6s;}
-.icon-cake { left: 70vw; top: 70vh; animation-delay: 8s;}
-@keyframes float-restaurant-icons {
-    0% { transform: translateY(0) scale(1);}
-    50% { transform: translateY(-30px) scale(1.12);}
-    100% { transform: translateY(0) scale(1);}
-}
-
-/* Gradient button */
-.btn-gradient {
-    background: linear-gradient(90deg, #f7971e 0%, #ffd200 100%);
-    color: #222;
-    border: none;
-    font-weight: 600;
-    transition: background 0.3s, color 0.3s;
-}
-.btn-gradient:hover, .btn-gradient:focus {
-    background: linear-gradient(90deg, #fc4a1a 0%, #f7b733 100%);
-    color: #fff;
-}
-
-/* Chart area glass effect */
-.card-body {
-    background: rgba(255,255,255,0.85);
-    border-radius: 12px;
-    box-shadow: 0 2px 12px 0 rgba(31, 38, 135, 0.06);
-    margin-bottom: 0;
-    z-index: 1;
-}
-
-/* Responsive tweaks */
-@media (max-width: 991px) {
-    .dashboard-bg { background-size: 200% 200%; }
-    .info-card { padding: 18px 10px 14px 10px; }
-}
-@media (max-width: 600px) {
-    .dashboard-bg { background-size: 300% 300%; }
-    .info-card { padding: 12px 4px 10px 4px; }
-    .dashboard-header-glass, .dashboard-header-glass-2 { padding: 10px 6px; }
-}
+    .info-card {
+        background: linear-gradient(135deg, #fffbe6 0%, #ffe5b4 100%);
+        color: #222;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+    .info-card--success {
+        background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
+        color: #fff;
+    }
+    .info-card--primary {
+        background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+        color: #fff;
+    }
+    .info-card--info {
+        background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+        color: #fff;
+    }
+    .info-card--warning {
+        background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+        color: #fff;
+    }
+    .info-card:hover {
+        transform: translateY(-5px) scale(1.03);
+        box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.18);
+    }
+    .card-title {
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+    .card-icon-wrapper {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        font-size: 2.5rem;
+        opacity: 0.12;
+        pointer-events: none;
+    }
+    /* Chart container fixed height for Chart.js */
+    .chart-body {
+        min-height: 320px;
+        height: 350px;
+        position: relative;
+    }
+    .chart-body canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+    }
+    @media (max-width: 991px) {
+        .info-card { padding: 18px 10px 14px 10px; }
+    }
+    @media (max-width: 600px) {
+        .info-card { padding: 12px 4px 10px 4px; }
+    }
 </style>
 {{ block.super }}
 {% endblock ScriptBlock %}
