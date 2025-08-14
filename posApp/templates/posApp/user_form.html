@@ -1,84 +1,63 @@
 {% extends "posApp/base.html" %}
 {% block pageContent %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <div class="card shadow-lg p-4 my-5">
-                <form id="user-form" autocomplete="off">
+<div class="mdc-layout-grid">
+    <div class="mdc-layout-grid__inner">
+        <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+            <div class="mdc-card">
+                <form id="user-form">
                     {% csrf_token %}
-                    <h4 class="card-title text-center mb-4">{{ form_title }}</h4>
+                    <h4 class="card-title">{{ form_title }}</h4>
                     
-                    <div class="form-group mb-3">
-                        <label for="username" class="form-label">Username</label>
+                    <div class="form-group">
+                        <label for="username">Username</label>
                         <input type="text" class="form-control" id="username" name="username" 
                                value="{% if user_obj %}{{ user_obj.username }}{% endif %}" required>
                     </div>
                     
-                    <div class="form-group mb-3">
-                        <label for="email" class="form-label">Email</label>
+                    <div class="form-group">
+                        <label for="email">Email</label>
                         <input type="email" class="form-control" id="email" name="email" 
                                value="{% if user_obj %}{{ user_obj.email }}{% endif %}" required>
                     </div>
                     
-                    <div class="form-group mb-3">
-                        <label for="first_name" class="form-label">First Name</label>
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
                         <input type="text" class="form-control" id="first_name" name="first_name" 
                                value="{% if user_obj %}{{ user_obj.first_name }}{% endif %}">
                     </div>
                     
-                    <div class="form-group mb-3">
-                        <label for="last_name" class="form-label">Last Name</label>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
                         <input type="text" class="form-control" id="last_name" name="last_name" 
                                value="{% if user_obj %}{{ user_obj.last_name }}{% endif %}">
                     </div>
                     
                     {% if not user_obj %}
-                    <div class="form-group mb-3">
-                        <label for="password" class="form-label">Password</label>
+                    <div class="form-group">
+                        <label for="password">Password</label>
                         <input type="password" class="form-control" id="password" name="password" required>
                     </div>
                     {% endif %}
                     
-                    <div class="form-check mb-2">
+                    <div class="form-group form-check">
                         <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
                                {% if user_obj and user_obj.is_active or not user_obj %}checked{% endif %}>
                         <label class="form-check-label" for="is_active">Active</label>
                     </div>
                     
-                    <div class="form-check mb-3">
+                    <div class="form-group form-check">
                         <input type="checkbox" class="form-check-input" id="is_staff" name="is_staff" 
                                {% if user_obj and user_obj.is_staff %}checked{% endif %}>
                         <label class="form-check-label" for="is_staff">Staff status</label>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary w-100">Save</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<style>
-body {
-    background: #f4f5fa !important;
-}
-.card {
-    border-radius: 1rem;
-    background: #fff;
-}
-.form-label {
-    font-weight: 500;
-}
-.btn-primary {
-    font-weight: 600;
-    letter-spacing: 0.03em;
-}
-@media (max-width: 576px) {
-    .card {
-        padding: 1.5rem 0.5rem !important;
-    }
-}
-</style>
-{% endblock %}
+{% endblock pageContent %}
 
 {% block ScriptBlock %}
 <script>
@@ -106,7 +85,10 @@ body {
                 },
                 error: function(xhr) {
                     var resp = xhr.responseJSON;
-                    alert_toast(resp && resp.message ? resp.message : "An error occurred", 'error');
+                    alert_toast(resp.message || "An error occurred", 'error');
                 }
             });
         });
+    });
+</script>
+{% endblock %}
