@@ -1,7 +1,4 @@
-{% extends "posApp/base.html" %} 
-{% load humanize %} 
-
-{% block pageContent %}
+{% extends "posApp/base.html" %} {% load humanize %} {% block pageContent %}
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
     <div class="mdc-card py-2">
         <div class="d-flex justify-content-between align-items-center">
@@ -9,25 +6,21 @@
         </div>
     </div>
 </div>
-
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
     <div class="mdc-card">
         <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered" id="sales-list-table">
+            <table class="table table-striped table-bordered">
                 <colgroup>
-                    <col width="5%">
                     <col width="5%">
                     <col width="20%">
                     <col width="20%">
                     <col width="25%">
                     <col width="15%">
                     <col width="15%">
-                    <col width="15%">
                 </colgroup>
                 <thead>
-                    <tr class="bg-primary text-white">
+                    <tr>
                         <th class="text-center py-1">#</th>
-                        <th class="text-center py-1"><i class="mdi mdi-receipt"></i></th>
                         <th class="text-center py-1">DateTime</th>
                         <th class="text-center py-1">Trans. Code</th>
                         <th class="text-center py-1">Total</th>
@@ -38,11 +31,10 @@
                 </thead>
                 <tbody>
                     {% for sale in sale_data %}
-                    <tr class="sale-row" data-id="{{ sale.id }}">
-                        <td class="px-2 py-1 text-center">{{ forloop.counter }}</td>
-                        <td class="px-2 py-1 text-center"><i class="mdi mdi-receipt-outline mdi-24px text-primary"></i></td>
+                    <tr>
+                        <td class="px-2 py-1 text-center">{{ sale.id }}</td>
                         <td class="px-2 py-1 text-start">{{ sale.date_added|date:'Y-m-d H:i' }}</td>
-                        <td class="px-2 py-1 text-start fw-bold">{{ sale.code }}</td>
+                        <td class="px-2 py-1 text-start">{{ sale.code }}</td>
                         <td class="px-2 py-1 text-end">{{ sale.grand_total|intcomma }}</td>
                         <td class="px-2 py-1 text-end">({{ sale.tax }}%) {{ sale.tax_amount|intcomma:2 }}</td>
                         <td class="px-2 py-1 text-center">{{ sale.item_count|intcomma }}</td>
@@ -50,11 +42,9 @@
                             <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--light mdc-ripple-upgraded view-data" type="button" data-id="{{ sale.id }}" title="View Receipt">
                                 <i class="material-icons mdc-button__icon">receipt</i>
                             </button>
-                            {% if user_role == 'admin' or user_role == 'manager' %}
                             <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--danger mdc-ripple-upgraded delete-data" type="button" data-id="{{ sale.id }}" data-code="{{ sale.code }}" title="Delete">
                                 <i class="material-icons mdc-button__icon">deleteoutline</i>
                             </button>
-                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -63,25 +53,17 @@
         </div>
     </div>
 </div>
-
-{% endblock pageContent %} 
-
-{% block ScriptBlock %}
+{% endblock pageContent %} {% block ScriptBlock %}
 <script>
     $(function() {
-        // Initialize DataTable
-        $('#sales-list-table').DataTable({
-            "order": [[ 0, "desc" ]] // Order by the first column (the counter) in descending order
-        });
-
         $('.view-data').click(function() {
-            uni_modal("Transaction's Receipt", "{% url 'receipt-modal' %}?id=" + $(this).attr('data-id'));
-        });
-        
+            uni_modal("Transaction's Receipt", "{% url 'receipt-modal' %}?id=" + $(this).attr('data-id'))
+        })
         $('.delete-data').click(function() {
-            _conf("Are you sure you want to delete the transaction record <b>" + $(this).attr('data-code') + "</b>?", "delete_sale", [$(this).attr('data-id')]);
-        });
-    });
+            _conf("Are you sure to delete <b>" + $(this).attr('data-code') + "</b> Transaction record?", "delete_sale", [$(this).attr('data-id')])
+        })
+
+    })
 
     function delete_sale($id) {
         start_loader();
@@ -96,50 +78,19 @@
             },
             dataType: "json",
             error: err => {
-                console.log(err);
-                alert_toast("An error occurred.", 'error');
+                console.log(err)
+                alert_toast("An error occured.", 'error');
                 end_loader();
             },
             success: function(resp) {
                 if (typeof resp == 'object' && resp.status == 'success') {
                     location.reload();
                 } else {
-                    alert_toast("An error occurred.", 'error');
+                    alert_toast("An error occured.", 'error');
                     end_loader();
                 }
             }
-        });
+        })
     }
 </script>
 {% endblock ScriptBlock %}
-
-<style>
-    /* Custom Styles for improved UI */
-    .mdc-card .card-title {
-        font-weight: 600;
-        font-size: 1.25rem;
-    }
-    .table thead th {
-        vertical-align: middle;
-        text-align: center;
-        background-color: #0d6efd; /* A modern blue for the header */
-        color: white;
-    }
-    .table tbody tr:hover {
-        background-color: #f1f1f1;
-        cursor: pointer;
-    }
-    .sale-row td {
-        vertical-align: middle;
-    }
-    .mdi-receipt-outline {
-        font-size: 24px;
-        color: #0d6efd;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-        background-color: #0d6efd !important;
-        color: white !important;
-        border: 1px solid #0d6efd !important;
-    }
-</style>
