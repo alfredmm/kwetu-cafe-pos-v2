@@ -2,6 +2,14 @@
 {% load humanize %} 
 {% block pageContent %}
 
+<div class="restaurant-anim-icons">
+    <span class="icon-fork">&#127860;</span>
+    <span class="icon-cup">&#9749;</span>
+    <span class="icon-burger">&#127828;</span>
+    <span class="icon-pizza">&#127829;</span>
+    <span class="icon-cake">&#127856;</span>
+</div>
+
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
     <div class="mdc-card" style="
          background-color: white;
@@ -243,7 +251,7 @@
 <!-- Include Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
-    .info-card {
+      .info-card {
         background: linear-gradient(135deg, darkgrey 0%, #b8c52f 100%);
         color: black;
         border-radius: 15px;
@@ -284,7 +292,6 @@
         opacity: 0.12;
         pointer-events: none;
     }
-    /* Chart container fixed height for Chart.js */
     .chart-body {
         min-height: 320px;
         height: 350px;
@@ -300,6 +307,32 @@
     }
     @media (max-width: 600px) {
         .info-card { padding: 12px 4px 10px 4px; }
+    }
+
+    /* --- Restaurant/Food Floating Animations --- */
+    .restaurant-anim-icons {
+        position: fixed;
+        pointer-events: none;
+        z-index: 2;
+        left: 0; top: 0; width: 100vw; height: 100vh;
+        overflow: hidden;
+    }
+    .restaurant-anim-icons span {
+        position: absolute;
+        font-size: 2.5rem;
+        opacity: 0.13;
+        animation: float-restaurant-icons 14s linear infinite;
+        user-select: none;
+    }
+    .icon-fork { left: 8vw; top: 12vh; animation-delay: 0s;}
+    .icon-cup { left: 80vw; top: 18vh; animation-delay: 2s;}
+    .icon-burger { left: 50vw; top: 80vh; animation-delay: 4s;}
+    .icon-pizza { left: 30vw; top: 60vh; animation-delay: 6s;}
+    .icon-cake { left: 70vw; top: 70vh; animation-delay: 8s;}
+    @keyframes float-restaurant-icons {
+        0% { transform: translateY(0) scale(1);}
+        50% { transform: translateY(-40px) scale(1.15) rotate(-8deg);}
+        100% { transform: translateY(0) scale(1);}
     }
 </style>
 
