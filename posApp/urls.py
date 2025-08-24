@@ -39,4 +39,10 @@ urlpatterns = [
     path('employees/create/', views.employee_create, name='employee_create'),
     path('employees/<int:emp_id>/edit/', views.employee_edit, name='employee_edit'),
     path('employees/<int:emp_id>/delete/', views.employee_delete, name='employee_delete'),
+
+    #MPESA STK payment urls
+    path('mpesa_app', views.mpesa_home, name='home'),
+    path('callback/', views.callback_handler, name='callback'),
+    path('check-status/<str:checkout_request_id>/', views.check_transaction_status, name='check_status'),
+    path('transactions/', views.transaction_list, name='transaction_list'),
 ]
