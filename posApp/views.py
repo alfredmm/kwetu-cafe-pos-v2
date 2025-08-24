@@ -865,3 +865,368 @@ def about(request):
         'user_role': get_user_role(request.user) if request.user.is_authenticated else None,
     }
     return render(request, 'posApp/about.html', context)
+
+import requests
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import MpesaTransaction
+import base64
+from datetime import datetime, timedelta
+import json
+import logging
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.conf import settings
+
+
+
+logger = logging.getLogger(__name__)
+
+# M-Pesa Express Sandbox Credentials
+consumer_key = settings.MPESA_CONFIG['CONSUMER_KEY']
+consumer_secret = settings.MPESA_CONFIG['CONSUMER_SECRET']
+business_short_code = settings.MPESA_CONFIG['BUSINESS_SHORT_CODE']
+passkey = settings.MPESA_CONFIG['PASS_KEY']
+callback_url = settings.MPESA_CONFIG['CALLBACK_URL']
+
+def get_access_token():
+    """Get OAuth access token for M-Pesa Express"""
+    api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    
+    # For M-Pesa Express sandbox, use the Pass Key as both consumer key and secret
+    consumer_key = settings.MPESA_CONFIG['CONSUMER_KEY']
+    consumer_secret = settings.MPESA_CONFIG['CONSUMER_SECRET']
+    
+    # Create basic auth header
+    auth_string = f"{consumer_key}:{consumer_secret}"
+    auth_bytes = auth_string.encode('utf-8')
+    auth_header = base64.b64encode(auth_bytes).decode('utf-8')
+    
+    headers = {
+        'Authorization': f'Basic {auth_header}',
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        logger.info("Requesting access token...")
+        response = requests.get(api_url, headers=headers)
+        response.raise_for_status()
+        response_data = response.json()
+        
+        access_token = response_data.get('access_token')
+        if access_token:
+            logger.info("Access token obtained successfully")
+            return access_token
+        else:
+            logger.error(f"No access token in response: {response_data}")
+            return None
+            
+    except Exception as e:
+        logger.error(f"Failed to get access token: {str(e)}")
+        if hasattr(e, 'response') and e.response:
+            logger.error(f"Response: {e.response.text}")
+        return None
+
+def mpesa_home(request):
+    if request.method == 'POST':
+        phone = request.POST.get('phone')
+        amount = request.POST.get('amount')
+        
+        if phone and amount:
+            # Format phone number to 254XXXXXXXX
+            if phone.startswith('0'):
+                phone = '254' + phone[1:]
+            elif phone.startswith('+254'):
+                phone = phone[1:]
+            elif not phone.startswith('254'):
+                # Add 254 prefix if not present
+                phone = '254' + phone.lstrip('+')
+                
+            result = initiate_stk_push(request, phone, amount)
+            
+            # If it's an AJAX request, return JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return result
+            
+            return result
+    
+    return render(request, 'payments/home.html')
+
+def initiate_stk_push(request, phone, amount):
+    # Get access token first
+    access_token = get_access_token()
+    if not access_token:
+        error_msg = "Failed to authenticate with M-Pesa API"
+        logger.error(error_msg)
+        
+        # Return JSON for AJAX requests
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': error_msg}, status=500)
+        return render(request, 'payments/error.html', {'error': error_msg})
+    
+    # STK Push API endpoint
+    api_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    business_short_code = settings.MPESA_CONFIG['BUSINESS_SHORT_CODE']
+    passkey = settings.MPESA_CONFIG['PASS_KEY']
+    
+    # Generate password for STK Push
+    password_str = f"{business_short_code}{passkey}{timestamp}"
+    password = base64.b64encode(password_str.encode()).decode()
+    
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json'
+    }
+    
+    payload = {
+        "BusinessShortCode": business_short_code,
+        "Password": password,
+        "Timestamp": timestamp,
+        "TransactionType": "CustomerPayBillOnline",
+        "Amount": int(amount),
+        "PartyA": phone,
+        "PartyB": business_short_code,
+        "PhoneNumber": phone,
+        "CallBackURL": callback_url,
+        "AccountReference": f"ORDER{timestamp}",
+        "TransactionDesc": "Payment for goods and services"
+    }
+    
+    try:
+        logger.info(f"Initiating STK Push for {phone}, Amount: {amount}")
+        logger.info(f"Payload: {json.dumps(payload, indent=2)}")
+        
+        response = requests.post(api_url, json=payload, headers=headers)
+        logger.info(f"Response Status: {response.status_code}")
+        logger.info(f"Response Text: {response.text}")
+        
+        response.raise_for_status()
+        response_data = response.json()
+        
+        # Check if the STK push was initiated successfully
+        if response_data.get('ResponseCode') == '0':
+            merchant_request_id = response_data.get('MerchantRequestID')
+            checkout_request_id = response_data.get('CheckoutRequestID')
+            customer_message = response_data.get('CustomerMessage')
+            
+            if merchant_request_id and checkout_request_id:
+                # Save transaction to database
+                transaction = MpesaTransaction.objects.create(
+                    merchant_request_id=merchant_request_id,
+                    checkout_request_id=checkout_request_id,
+                    phone_number=phone,
+                    amount=amount,
+                    raw_response=json.dumps(response_data),
+                    status='Pending'
+                )
+                
+                logger.info(f"STK Push initiated successfully. CheckoutRequestID: {checkout_request_id}")
+                
+                # Return JSON for AJAX requests
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'checkout_request_id': checkout_request_id,
+                        'merchant_request_id': merchant_request_id,
+                        'customer_message': customer_message,
+                        'phone': phone,
+                        'amount': amount
+                    })
+                
+                return render(request, 'payments/payment_initiated.html', {
+                    'phone': phone,
+                    'amount': amount,
+                    'transaction': transaction,
+                    'customer_message': customer_message
+                })
+            else:
+                error_msg = "Invalid response: Missing transaction IDs"
+                logger.error(error_msg)
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'error': error_msg}, status=500)
+                return render(request, 'payments/error.html', {'error': error_msg})
+        else:
+            error_msg = response_data.get('errorMessage', f"Request failed: {response_data}")
+            logger.error(f"STK Push failed: {error_msg}")
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'error': error_msg}, status=500)
+            return render(request, 'payments/error.html', {'error': error_msg})
+        
+    except requests.exceptions.RequestException as e:
+        error_msg = f"Network error: {str(e)}"
+        if hasattr(e, 'response') and e.response:
+            try:
+                error_response = e.response.json()
+                error_msg = error_response.get('errorMessage', error_msg)
+                logger.error(f"API Error Response: {error_response}")
+            except:
+                error_msg += f" | Response: {e.response.text}"
+        logger.error(error_msg)
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': error_msg}, status=500)
+        return render(request, 'payments/error.html', {'error': error_msg})
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': str(e)}, status=500)
+        return render(request, 'payments/error.html', {'error': str(e)})
+
+@csrf_exempt
+def callback_handler(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            logger.info(f"Received M-Pesa callback: {json.dumps(data, indent=2)}")
+            
+            stk_callback = data.get('Body', {}).get('stkCallback', {})
+            result_code = stk_callback.get('ResultCode')
+            result_desc = stk_callback.get('ResultDesc')
+            checkout_request_id = stk_callback.get('CheckoutRequestID')
+            
+            if checkout_request_id:
+                try:
+                    transaction = MpesaTransaction.objects.get(checkout_request_id=checkout_request_id)
+                    
+                    if result_code == 0:  # Payment successful
+                        callback_metadata = stk_callback.get('CallbackMetadata', {})
+                        items = callback_metadata.get('Item', [])
+                        
+                        for item in items:
+                            name = item.get('Name')
+                            value = item.get('Value')
+                            
+                            if name == 'MpesaReceiptNumber':
+                                transaction.receipt_number = value
+                            elif name == 'Amount':
+                                transaction.amount = value
+                            elif name == 'TransactionDate':
+                                try:
+                                    transaction.transaction_date = datetime.strptime(str(value), '%Y%m%d%H%M%S')
+                                except ValueError:
+                                    logger.warning(f"Could not parse transaction date: {value}")
+                        
+                        transaction.status = 'Completed'
+                        logger.info(f"Payment completed for {checkout_request_id}. Receipt: {transaction.receipt_number}")
+                        
+                    else:
+                        # Payment failed, cancelled, or timed out
+                        transaction.status = 'Failed'
+                        
+                        # Store the failure reason in raw_response
+                        current_raw = {}
+                        try:
+                            if transaction.raw_response:
+                                current_raw = json.loads(transaction.raw_response)
+                        except (json.JSONDecodeError, TypeError):
+                            pass
+                        
+                        # Add callback result to raw response
+                        current_raw.update({
+                            'callback_result_code': result_code,
+                            'callback_result_desc': result_desc,
+                            'ResultDesc': result_desc  # For easier access
+                        })
+                        
+                        transaction.raw_response = json.dumps(current_raw)
+                        
+                        logger.info(f"Payment failed for {checkout_request_id}. Code: {result_code}, Reason: {result_desc}")
+                    
+                    transaction.save()
+                    
+                except MpesaTransaction.DoesNotExist:
+                    logger.warning(f"Transaction not found for CheckoutRequestID: {checkout_request_id}")
+            
+            return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Callback processed successfully'})
+            
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON in callback request")
+            return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Invalid JSON format'})
+        except Exception as e:
+            logger.error(f"Callback processing error: {str(e)}")
+            return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Processing failed'})
+    
+    return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Only POST method allowed'})
+
+def check_transaction_status(request, checkout_request_id):
+    """Check transaction status for real-time updates"""
+    logger.info(f"Status check requested for: {checkout_request_id}")
+    
+    try:
+        transaction = MpesaTransaction.objects.get(checkout_request_id=checkout_request_id)
+        logger.info(f"Found transaction: {transaction.status}")
+        
+        response_data = {
+            'status': transaction.status,
+            'phone_number': transaction.phone_number,
+            'amount': str(transaction.amount),
+            'checkout_request_id': transaction.checkout_request_id
+        }
+        
+        if transaction.status == 'Completed':
+            response_data.update({
+                'receipt_number': transaction.receipt_number,
+                'transaction_date': transaction.transaction_date.isoformat() if transaction.transaction_date else None
+            })
+        elif transaction.status == 'Failed':
+            # Try to extract failure reason from raw response or callback data
+            failure_reason = 'Payment failed'
+            try:
+                if transaction.raw_response:
+                    raw_data = json.loads(transaction.raw_response)
+                    failure_reason = raw_data.get('ResultDesc', failure_reason)
+            except (json.JSONDecodeError, TypeError):
+                logger.warning(f"Could not parse raw response for transaction {checkout_request_id}")
+                
+            response_data['reason'] = failure_reason
+            logger.info(f"Transaction failed with reason: {failure_reason}")
+                
+        return JsonResponse(response_data)
+        
+    except MpesaTransaction.DoesNotExist:
+        logger.warning(f"Transaction not found: {checkout_request_id}")
+        return JsonResponse({'error': 'Transaction not found', 'status': 'NotFound'}, status=404)
+    
+def transaction_list(request):
+    q = request.GET.get("q", "").strip()
+    start_date = request.GET.get("start_date", "")
+    end_date = request.GET.get("end_date", "")
+    per_page = int(request.GET.get("per_page", 20))
+
+    transactions = MpesaTransaction.objects.all()
+
+    # ✅ Search phone number OR status (anywhere in text)
+    if q:
+        transactions = transactions.filter(
+            Q(phone_number__icontains=q) | Q(status__icontains=q)
+        )
+
+    # ✅ Date range filter
+    # if start_date and end_date:
+    #     transactions = transactions.filter(date__range=[start_date, end_date])
+    # # ...existing code...
+    # ✅ Date range filter
+    if start_date and end_date:
+        transactions = transactions.filter(transaction_date__range=[start_date, end_date])
+# ...existing code...
+    # --- Pagination ---
+    
+    # Get transactions per page from URL, default to 20
+    per_page = int(request.GET.get('per_page', 20))
+    if per_page not in [20, 50, 100]:
+        per_page = 20 # Sanitize input
+        
+    paginator = Paginator(transactions, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'transactions': page_obj,
+        'per_page': per_page,
+    }
+    return render(request, 'payments/transactions.html', context)
