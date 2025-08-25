@@ -1229,8 +1229,5 @@ def transaction_list(request):
         'transactions': page_obj,
         'per_page': per_page,
     }
-<<<<<<< HEAD
+
     return render(request, 'payments/transactions.html', context)
-=======
-    return render(request, 'payments/transactions.html', context)
->>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
