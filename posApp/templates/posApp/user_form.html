@@ -1,0 +1,94 @@
+{% extends "posApp/base.html" %}
+{% block pageContent %}
+<div class="mdc-layout-grid">
+    <div class="mdc-layout-grid__inner">
+        <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+            <div class="mdc-card">
+                <form id="user-form">
+                    {% csrf_token %}
+                    <h4 class="card-title">{{ form_title }}</h4>
+                    
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" 
+                               value="{% if user_obj %}{{ user_obj.username }}{% endif %}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               value="{% if user_obj %}{{ user_obj.email }}{% endif %}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" 
+                               value="{% if user_obj %}{{ user_obj.first_name }}{% endif %}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" 
+                               value="{% if user_obj %}{{ user_obj.last_name }}{% endif %}">
+                    </div>
+                    
+                    {% if not user_obj %}
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
+                               {% if user_obj and user_obj.is_active or not user_obj %}checked{% endif %}>
+                        <label class="form-check-label" for="is_active">Active</label>
+                    </div>
+                    
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="is_staff" name="is_staff" 
+                               {% if user_obj and user_obj.is_staff %}checked{% endif %}>
+                        <label class="form-check-label" for="is_staff">Staff status</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block ScriptBlock %}
+<script>
+    $(function() {
+        $('#user-form').submit(function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var formData = form.serialize();
+            
+            $.ajax({
+                url: window.location.href,
+                method: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(resp) {
+                    if(resp.success) {
+                        alert_toast(resp.message, 'success');
+                        setTimeout(function() {
+                            $('#uni_modal').modal('hide');
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        alert_toast(resp.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    var resp = xhr.responseJSON;
+                    alert_toast(resp.message || "An error occurred", 'error');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

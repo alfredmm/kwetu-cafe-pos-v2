@@ -1,0 +1,250 @@
+{% extends "posApp/base.html" %}
+
+{% block pageContent %}
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">
+                Users Management
+                <small class="text-muted">({{ page_obj.paginator.count }} total)</small>
+            </h4>
+            <div class="text-start">
+                <a href="{% url 'user_create' %}" class="btn btn-primary bg-gradient btn-sm rounded-0">
+                    <i class="mdi mdi-plus"></i><span> Add New User</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">{{ page_obj.paginator.count }}</h4>
+                                <p class="card-text">Total Users</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">{{ active_users }}</h4>
+                                <p class="card-text">Active Users</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">{{ staff_users }}</h4>
+                                <p class="card-text">Staff Users</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">Search</span>
+                            <input type="text" class="form-control" name="search"
+                                   placeholder="Search by username, email, or name..."
+                                   value="{{ search_query }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-outline-primary me-2">
+                            Search
+                        </button>
+                        {% if search_query %}
+                        <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">
+                            Clear
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Date Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_obj in page_obj %}
+                            <tr>
+                                <td>
+                                    <strong>{{ user_obj.username }}</strong>
+                                    {% if user_obj.is_superuser %}
+                                        <span class="badge bg-danger ms-1">Super Admin</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user_obj.get_full_name|default:"-" }}</td>
+                                <td>{{ user_obj.email|default:"-" }}</td>
+                                <td>
+                                    {% if user_obj.userrole %}
+                                        <span class="badge bg-info">{{ user_obj.userrole.get_role_display }}</span>
+                                    {% elif user_obj.is_superuser %}
+                                        <span class="badge bg-danger">Super Admin</span>
+                                    {% elif user_obj.is_staff %}
+                                        <span class="badge bg-warning">Staff</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">User</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user_obj.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user_obj.date_joined|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary btn-edit-user"
+                                                data-url="{% url 'user_edit' %}?id={{ user_obj.id }}">
+                                            Edit
+                                        </button>
+                                        {% if not user_obj.is_superuser %}
+                                        <button class="btn btn-sm btn-outline-danger btn-delete-user"
+                                                data-url="{% url 'user_delete' %}?id={{ user_obj.id }}">
+                                            Delete
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    {% if search_query %}
+                                        <p class="text-muted">No users found matching "{{ search_query }}".</p>
+                                        <a href="{% url 'user_list' %}" class="btn btn-outline-primary">Show All Users</a>
+                                    {% else %}
+                                        <p class="text-muted">No users found.</p>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Users pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shared Modal -->
+<div class="modal fade" id="modalUserForm" tabindex="-1" aria-labelledby="modalUserLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" id="modalUserContent">
+      <!-- Dynamic content will be loaded here -->
+    </div>
+  </div>
+</div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<script>
+$(document).ready(function () {
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+    $.ajaxSetup({
+        headers: { 'X-CSRFToken': csrftoken }
+    });
+
+    // Edit
+    $('.btn-edit-user').on('click', function () {
+        const url = $(this).data('url');
+        $('#modalUserContent').load(url, function () {
+            $('#modalUserForm').modal('show');
+        });
+    });
+
+    // Delete
+    $('.btn-delete-user').on('click', function () {
+        const url = $(this).data('url');
+        $('#modalUserContent').load(url, function () {
+            $('#modalUserForm').modal('show');
+        });
+    });
+});
+</script>
+{% endblock ScriptBlock %}

@@ -1,0 +1,621 @@
+{% extends "posApp/base.html" %}
+{% block pageContent %}
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2" style="outline: 2px solid #ecaf29;">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="card-title mb-0" style="font-weight: bold;">Make Order</h2>
+        </div>
+    </div>
+</div>
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card">
+        <form action="" id="pos-form">
+            <fieldset>
+                <legend>Add Food/Drink</legend>
+                <div class="row align-items-end">
+                    <div class="col-lg-5 col-md-5 col-sm-12">
+                        <div class="form-group mb-3">
+                            <label for="product-id">Select Food/Drink</label>
+                            <select id="product-id" class="form-select form-select-sm">
+                                <option value="" disabled selected></option>
+                                {% for product in products %}
+                                    <option value="{{ product.pk }}">{{ product }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-5 col-md-12">
+                        <div class="form-group mb-3">
+                            <label for="product-qty">Qty</label>
+                            <input type="number" class="form-control form-control-sm text-center" step="any" id="product-qty" value="1">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-2 col-md-12">
+                        <div class="form-group mb-3">
+                            <button class="btn btn-light btn-sm bg-gradient border rounded-0 text-start" type="button" id="add_item"><i class="mdi mdi-plus"></i> Add Item</button>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div class="d-flex w-100" id="POS-field">
+                    <div class="col-8 bg-gradient bg-light border h-100">
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col width="5%">
+                                <col width="15%">
+                                <col width="40%">
+                                <col width="20%">
+                                <col width="20%">
+                            </colgroup>
+                            <thead>
+                                <tr class="bg-dark bg-gradient bg-opacity-50 text-light">
+                                    <th class="py-1 px-2 text-center  text-light"></th>
+                                    <th class="py-1 px-2 text-center  text-light">QTY</th>
+                                    <th class="py-1 px-2 text-center  text-light">Product</th>
+                                    <th class="py-1 px-2 text-center  text-light">Price</th>
+                                    <th class="py-1 px-2 text-center  text-light">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-4 bg-gradient bg-dark bg-opacity-50 border h-100">
+                        <div class="col-12 py-4 px-2">
+                            <dl>
+                                <dt class="h4 fw-bold text-light">Sub Total</dt>
+                                <dd class="text-end py-1 px-2 rounded-0 bg-light">
+                                    <input type="hidden" name="sub_total" value="0">
+                                    <span class="h3 fw-bold" id="sub_total">0.00</span>
+                                </dd>
+                                <dt class="h4 fw-bold text-light">Tax Inclusive (%)</dt>
+                                <dd>
+                                    <input type="number" class="form-control form-control-lg rounded-0 text-end" step="any" min="0" max="100" name="tax" value="0">
+                                </dd>
+                                <dt class="h4 fw-bold text-light">Tax Amount</dt>
+                                <dd class="text-end py-1 px-2 rounded-0 bg-light">
+                                    <input type="hidden" name="tax_amount" value="0">
+                                    <span class="h3 fw-bold" id="tax_amount">0.00</span>
+                                </dd>
+                                <dt class="h4 fw-bold text-light">Grand Total</dt>
+                                <dd class="text-end py-1 px-2 rounded-0 bg-light">
+                                    <input type="hidden" name="grand_total" value="0">
+                                    <input type="hidden" name="tendered_amount" value="0">
+                                    <input type="hidden" name="amount_change" value="0">
+                                    <span class="h3 fw-bold" id="grand_total">0.00</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="row">
+                <div class="col-md-12 text-end">
+                    <button class="btn btn-primary btn-sm rounded-0" type="button" id="check_out"><i class="mdi mdi-save"></i> Checkout</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<noscript id="item-clone">
+    <tr>
+        <td class="px-2 py-1 text-center">
+            <button class="btn btn-sm btn-outline-danger rounded-0 rem-item" type="button"><i class="mdi mdi-close"></i></button>
+        </td>
+        <td class="px-2 py-1">
+            <input type="hidden" name="product_id[]">
+            <input type="hidden" name="price[]">
+            <input type="number" name="qty[]" min="0" class="form-control form-control-sm rounded-0 text-center">
+        </td>
+        <td class="px-2 py-1 product_name text-start"></td>
+        <td class="px-2 py-1 product_price text-end"></td>
+        <td class="px-2 py-1 product_total text-end"></td>
+    </tr>
+</noscript>
+
+<!-- Payment Method Modal with MPESA Payment UI -->
+<div class="modal fade" id="paymentMethodModal" tabindex="-1" aria-labelledby="paymentMethodLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 20px;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentMethodLabel">Select Payment Method</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="choose-method-section">
+          <div class="mb-3 text-center">
+            <h4>Grand Total: <span id="modal-grand-total" class="fw-bold"></span></h4>
+          </div>
+          <button id="pay-cash-btn" class="btn btn-success w-100 mb-2">Pay Cash</button>
+          <button id="pay-mpesa-btn" class="btn btn-primary w-100">Pay with M-Pesa</button>
+        </div>
+        <!-- MPESA PAYMENT UI (DO NOT CHANGE CODE BELOW) -->
+        <div id="mpesa-payment-section" style="display:none;">
+          <div class="container" style="box-shadow:none;max-width:100%;">
+            <div id="payment-form" class="form-section">
+                <div class="header">
+                    <h1>🏪 M-Pesa POS</h1>
+                    <p>Secure payments with M-Pesa</p>
+                    <a href="/transactions/" class="view-transactions-btn" target="_blank">View All Transactions</a>
+                </div>
+                <div class="form-container">
+                    <form id="paymentForm" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="phone">📱 Phone Number:</label>
+                            <input type="text" id="phone" name="phone" placeholder="e.g. 254701575328" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">💰 Amount (KES):</label>
+                            <input type="number" id="amount" name="amount" min="1" placeholder="Enter amount" required>
+                        </div>
+                        <button type="submit" class="payment-btn" id="payBtn">
+                            Send Payment Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div id="loading-state" class="status-container">
+                <div class="spinner"></div>
+                <h2>Processing Payment...</h2>
+                <p class="status-message">Please check your phone for the M-Pesa prompt and enter your PIN to complete the payment.</p>
+                <div class="transaction-details">
+                    <h4>Transaction Details</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span class="detail-value" id="loading-phone"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Amount:</span>
+                        <span class="detail-value">KES <span id="loading-amount"></span></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">Waiting for payment...</span>
+                    </div>
+                </div>
+            </div>
+            <div id="success-state" class="status-container">
+                <div class="status-icon success-icon">✅</div>
+                <h2 class="status-title" style="color: #28a745;">Payment Successful!</h2>
+                <p class="status-message">Your payment has been processed successfully.</p>
+                <div class="transaction-details">
+                    <h4>Payment Confirmation</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Receipt Number:</span>
+                        <span class="detail-value" id="success-receipt"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Amount Paid:</span>
+                        <span class="detail-value">KES <span id="success-amount"></span></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone Number:</span>
+                        <span class="detail-value" id="success-phone"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Date & Time:</span>
+                        <span class="detail-value" id="success-date"></span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <a href="/" class="btn btn-primary">New Payment</a>
+                    <button class="btn btn-secondary" onclick="window.print()">Print Receipt</button>
+                    <a href="/transactions/" class="btn btn-success" target="_blank">View All Transactions</a>
+                </div>
+            </div>
+            <div id="failed-state" class="status-container">
+                <div class="status-icon error-icon">❌</div>
+                <h2 class="status-title" style="color: #dc3545;">Payment Failed</h2>
+                <p class="status-message" id="failure-message">The payment could not be completed.</p>
+                <div class="transaction-details">
+                    <h4>Transaction Details</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone Number:</span>
+                        <span class="detail-value" id="failed-phone"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Amount:</span>
+                        <span class="detail-value">KES <span id="failed-amount"></span></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Reason:</span>
+                        <span class="detail-value" id="failure-reason"></span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="retryPayment()">Retry Payment</button>
+                    <a href="/" class="btn btn-secondary">Start Over</a>
+                    <a href="/transactions/" class="btn btn-success" target="_blank">View All Transactions</a>
+                </div>
+            </div>
+            <div id="cancelled-state" class="status-container">
+                <div class="status-icon warning-icon">⚠️</div>
+                <h2 class="status-title" style="color: #ffc107;">Payment Cancelled</h2>
+                <p class="status-message">You cancelled the payment request on your phone.</p>
+                <div class="transaction-details">
+                    <h4>Transaction Details</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone Number:</span>
+                        <span class="detail-value" id="cancelled-phone"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Amount:</span>
+                        <span class="detail-value">KES <span id="cancelled-amount"></span></span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="retryPayment()">Try Again</button>
+                    <a href="/" class="btn btn-secondary">Start Over</a>
+                    <a href="/transactions/" class="btn btn-success" target="_blank">View All Transactions</a>
+                </div>
+            </div>
+          </div>
+        </div>
+        <!-- END MPESA PAYMENT UI -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<script>
+    var product_json = '{{ product_json }}'
+    if (product_json == "" || product_json == "{}") {
+        product_json = {}
+    } else {
+        product_json = product_json.replaceAll('&quot;', '"')
+        product_json = $.parseJSON(product_json)
+    }
+    var prod_arr = {}
+    if (Object.keys(product_json).length > 0) {
+        Object.keys(product_json).map(k => {
+            prod_arr[product_json[k].id] = product_json[k]
+        })
+    }
+
+    function calc() {
+        var sub_total = 0;
+        var grand_total = 0;
+        $('#POS-field table tbody tr').each(function() {
+            price = $(this).find('[name="price[]"]').val()
+            qty = $(this).find('[name="qty[]"]').val()
+            qty = qty > 0 ? qty : 0
+            total = parseFloat(price) * parseFloat(qty)
+            $(this).find('.product_total').text(parseFloat(total).toLocaleString('en-US'))
+            sub_total += parseFloat(total)
+        })
+        tax = $('[name="tax"]').val()
+        tax = tax / 100;
+        var tax_amount = parseFloat(sub_total) * parseFloat(tax);
+        $('#tax_amount').text(parseFloat(tax_amount).toLocaleString('en-US'))
+        $('[name="tax_amount"]').val(parseFloat(tax_amount))
+        $('#grand_total').text(parseFloat(sub_total).toLocaleString('en-US'))
+        $('[name="grand_total"]').val(parseFloat(sub_total))
+        $('#sub_total').text(parseFloat(sub_total).toLocaleString('en-US'))
+        $('[name="sub_total"]').val(parseFloat(sub_total))
+    }
+    $(function() {
+        $('#product-id').select2({
+            placeholder: "Please Select Product here",
+            width: '100%'
+        })
+        $('#add_item').click(function() {
+            var id = $('#product-id').val()
+            var qty = $('#product-qty').val()
+            if (id == '' || qty == '' || id == null || qty == null) {
+                alert("Product and Quantity Field is required!")
+                return false
+            }
+            if (!!prod_arr[id]) {
+                if ($('#POS-field table tbody input[name="product_id[]"][value="' + id + '"]').length > 0) {
+                    alert('Item Already in the List.')
+                    return false;
+                }
+                data = prod_arr[id]
+                var tr = $($('noscript#item-clone').html()).clone()
+                tr.find('[name="qty[]"]').val(qty)
+                tr.find('[name="product_id[]"]').val(id)
+                tr.find('[name="price[]"]').val(data.price)
+                tr.find('.product_name').text(data.name)
+                tr.find('.product_price').text(parseFloat(data.price).toLocaleString('en-US'))
+                tr.find('.product_total').text(parseFloat(data.price * qty).toLocaleString('en-US'))
+                $('#POS-field table tbody').append(tr)
+                $('#product-id').val('').trigger('change')
+                $('#product-qty').val(1)
+                calc()
+                tr.find('[name="qty[]"]').on('input keypress keyup keydown', function() {
+                    calc()
+                })
+                tr.find('.rem-item').click(function() {
+                    if (confirm("Are you sure to remove " + data.name + " product form list?") == true) {
+                        tr.remove()
+                        calc()
+                    }
+                })
+            } else {
+                alert("Undefined Product");
+            }
+        })
+        $('[name="tax"]').on('input keypress keydown keyup', function() {
+            calc()
+        })
+
+        // --- Payment Modal Integration ---
+        $('#check_out').click(function() {
+            if ($('#POS-field table tbody tr').length <= 0) {
+                alert("Add atleast 1 product first!")
+                return false;
+            }
+            // Show payment method modal
+            $('#modal-grand-total').text($('#grand_total').text());
+            $('#paymentMethodModal').modal('show');
+            setTimeout(function() {
+                $('#amount').val($('[name="grand_total"]').val());
+            }, 300);
+        });
+
+        // Handle cash payment
+        $('#pay-cash-btn').click(function() {
+            $('#paymentMethodModal').modal('hide');
+            $('#pos-form').submit();
+        });
+
+        // Handle MPESA payment
+        $('#pay-mpesa-btn').click(function() {
+            $('#choose-method-section').hide();
+            $('#mpesa-payment-section').show();
+            $('#amount').val($('[name="grand_total"]').val());
+        });
+
+        // Reset modal on close
+        $('#paymentMethodModal').on('hidden.bs.modal', function () {
+            $('#choose-method-section').show();
+            $('#mpesa-payment-section').hide();
+            $('#paymentForm')[0].reset();
+            $('#loading-state, #success-state, #failed-state, #cancelled-state').hide();
+            $('#payment-form').show();
+        });
+
+        $('#pos-form').submit(function(e) {
+            e.preventDefault();
+            var _this = $(this)
+            $('.err-msg').remove();
+            var el = $('<div>')
+            el.addClass("alert alert-danger err-msg")
+            el.hide()
+            if (_this[0].checkValidity() == false) {
+                _this[0].reportValidity();
+                return false;
+            }
+            start_loader();
+            $.ajax({
+                headers: {
+                    "X-CSRFToken": '{{csrf_token}}'
+                },
+                url: "{% url 'save-pos' %}",
+                data: new FormData($(this)[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        el.removeClass("alert alert-danger err-msg")
+                        uni_modal("Receipt", "{% url 'receipt-modal' %}?id=" + resp.sale_id)
+                        $('#uni_modal').on('hide.bs.modal', function() {
+                            location.reload()
+                        })
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        el.text(resp.msg)
+                    } else {
+                        el.text("An error occured", 'error');
+                        end_loader();
+                        console.err(resp)
+                    }
+                    _this.prepend(el)
+                    el.show('slow')
+                    $("html, body, .modal").scrollTop(0);
+                    end_loader()
+                }
+            })
+        })
+    })
+
+    // --- MPESA PAYMENT SCRIPT (DO NOT CHANGE) ---
+    let currentTransaction = null;
+    let statusCheckInterval = null;
+    let paymentData = { phone: '', amount: '' };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var paymentForm = document.getElementById('paymentForm');
+        if(paymentForm){
+            paymentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const phone = document.getElementById('phone').value;
+                const amount = document.getElementById('amount').value;
+                paymentData.phone = phone;
+                paymentData.amount = amount;
+                showLoadingState(phone, amount);
+                const formData = new FormData();
+                formData.append('phone', phone);
+                formData.append('amount', amount);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                fetch('/mpesa_app/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    return response.text();
+                })
+                .then(html => {
+                    try {
+                        const jsonData = JSON.parse(html);
+                        if (jsonData.error) {
+                            showFailedState(phone, amount, jsonData.error);
+                            return;
+                        } else if (jsonData.success && jsonData.checkout_request_id) {
+                            currentTransaction = jsonData.checkout_request_id;
+                            setTimeout(() => { startStatusChecking(jsonData.checkout_request_id); }, 3000);
+                            return;
+                        }
+                    } catch (e) {}
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    if (html.includes('Payment Error') || html.includes('error')) {
+                        const errorElement = doc.querySelector('p');
+                        const errorMsg = errorElement ? errorElement.textContent : 'Unknown error occurred';
+                        showFailedState(phone, amount, errorMsg);
+                        return;
+                    }
+                    let transactionId = null;
+                    const allText = doc.body.textContent || '';
+                    const transactionMatch = allText.match(/ws_CO_\w+/);
+                    if (transactionMatch) {
+                        transactionId = transactionMatch[0];
+                    } else {
+                        const idMatch = allText.match(/Transaction ID:\s*([^\s\n]+)/);
+                        if (idMatch) transactionId = idMatch[1];
+                    }
+                    if (transactionId) {
+                        currentTransaction = transactionId;
+                        setTimeout(() => { startStatusChecking(transactionId); }, 3000);
+                    } else {
+                        showFailedState(phone, amount, 'Could not initiate payment request - no transaction ID found');
+                    }
+                })
+                .catch(error => {
+                    showFailedState(phone, amount, 'Network error occurred');
+                });
+            });
+        }
+    });
+
+    function showLoadingState(phone, amount) {
+        document.getElementById('payment-form').style.display = 'none';
+        document.getElementById('success-state').style.display = 'none';
+        document.getElementById('failed-state').style.display = 'none';
+        document.getElementById('cancelled-state').style.display = 'none';
+        document.getElementById('loading-phone').textContent = phone;
+        document.getElementById('loading-amount').textContent = amount;
+        document.getElementById('loading-state').style.display = 'block';
+    }
+    function showSuccessState(data) {
+        clearInterval(statusCheckInterval);
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('success-receipt').textContent = data.receipt_number || 'N/A';
+        document.getElementById('success-amount').textContent = data.amount || paymentData.amount;
+        document.getElementById('success-phone').textContent = data.phone_number || paymentData.phone;
+        document.getElementById('success-date').textContent = new Date().toLocaleString();
+        document.getElementById('success-state').style.display = 'block';
+    }
+    function showFailedState(phone, amount, reason) {
+        clearInterval(statusCheckInterval);
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('failed-phone').textContent = phone;
+        document.getElementById('failed-amount').textContent = amount;
+        document.getElementById('failure-reason').textContent = reason;
+        document.getElementById('failure-message').textContent = getFailureMessage(reason);
+        document.getElementById('failed-state').style.display = 'block';
+    }
+    function showCancelledState(phone, amount) {
+        clearInterval(statusCheckInterval);
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('cancelled-phone').textContent = phone;
+        document.getElementById('cancelled-amount').textContent = amount;
+        document.getElementById('cancelled-state').style.display = 'block';
+    }
+    function getFailureMessage(reason) {
+        const messages = {
+            'Request Cancelled by user': 'You cancelled the payment on your phone. You can try again when ready.',
+            'The service request is processed successfully.': 'Payment request timed out. Please ensure your phone has network coverage.',
+            'Invalid Access Token': 'System authentication error. Please try again.',
+            'Insufficient funds': 'You don\'t have enough money in your M-Pesa account.',
+            'Invalid phone number': 'Please check your phone number and try again.',
+            'Request timeout': 'The payment request timed out. Please try again.'
+        };
+        return messages[reason] || 'An error occurred while processing your payment. Please try again.';
+    }
+    function startStatusChecking(transactionId) {
+        let attempts = 0;
+        const maxAttempts = 90;
+        statusCheckInterval = setInterval(() => {
+            attempts++;
+            fetch(`/check-status/${transactionId}/`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.status === 404) {
+                        if (attempts >= 10) throw new Error('Transaction not found in database after 20 seconds');
+                        return { status: 'NotFound' };
+                    }
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'NotFound') return;
+                    if (data.status === 'Completed') {
+                        showSuccessState(data);
+                        // Optionally, trigger order save here via AJAX if needed
+                    } else if (data.status === 'Failed') {
+                        if (data.reason && (data.reason.includes('Cancelled by user') || data.reason.includes('Request Cancelled'))) {
+                            showCancelledState(paymentData.phone, paymentData.amount);
+                        } else {
+                            showFailedState(paymentData.phone, paymentData.amount, data.reason || 'Payment failed');
+                        }
+                    } else if (data.status === 'Pending') {
+                        if (attempts >= maxAttempts) {
+                            showFailedState(paymentData.phone, paymentData.amount, 'Payment request timed out after 3 minutes. Please check your M-Pesa messages to confirm if payment went through.');
+                        }
+                    } else {
+                        if (attempts >= maxAttempts) {
+                            showFailedState(paymentData.phone, paymentData.amount, 'Could not verify payment status. Please check your M-Pesa messages.');
+                        }
+                    }
+                })
+                .catch(error => {
+                    if (attempts < 10 && (error.message.includes('404') || error.message.includes('not found'))) return;
+                    if (attempts >= maxAttempts) {
+                        showFailedState(paymentData.phone, paymentData.amount, 'Could not verify payment status due to network error. Please check your M-Pesa messages to confirm payment.');
+                    }
+                });
+        }, 2000);
+    }
+    function retryPayment() {
+        document.getElementById('phone').value = paymentData.phone;
+        document.getElementById('amount').value = paymentData.amount;
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('success-state').style.display = 'none';
+        document.getElementById('failed-state').style.display = 'none';
+        document.getElementById('cancelled-state').style.display = 'none';
+        document.getElementById('payment-form').style.display = 'block';
+    }
+    function autoRetryIfCancelled() {
+        setTimeout(() => {
+            if (document.getElementById('cancelled-state').style.display === 'block') {
+                retryPayment();
+            }
+        }, 5000);
+    }
+    // --- END MPESA PAYMENT SCRIPT ---
+</script>
+{% endblock ScriptBlock %}

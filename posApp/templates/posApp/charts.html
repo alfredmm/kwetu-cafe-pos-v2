@@ -1,0 +1,372 @@
+{% extends "posApp/base.html" %} {% load humanize %} {% block pageContent %}
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">Sales Analytics</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Date Filter Controls -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card p-3">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="year_filter">Year</label>
+                    <select id="year_filter" class="form-control">
+                        <!-- Will be populated via JavaScript -->
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="month_filter">Month</label>
+                    <select id="month_filter" class="form-control">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button id="apply_filter" class="btn btn-primary form-control">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Daily Sales Line Chart -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card mb-3">
+        <div class="d-flex justify-content-between align-items-center p-3">
+            <h5 class="card-title mb-0">Daily Sales Trend</h5>
+            <div class="text-right">
+                <h6 id="total_month_sales" class="text-success mb-0">Total: $0.00</h6>
+            </div>
+        </div>
+        <div class="card-body">
+            <canvas id="dailySalesChart" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Top 10 Selling Items -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-6">
+    <div class="mdc-card mb-3">
+        <div class="d-flex justify-content-between align-items-center p-3">
+            <h5 class="card-title mb-0">Top 10 Selling Products</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="topProductsChart" height="350"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Sales by Category -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-6">
+    <div class="mdc-card mb-3">
+        <div class="d-flex justify-content-between align-items-center p-3">
+            <h5 class="card-title mb-0">Sales by Category</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="categorySalesChart" height="350"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<!-- Include Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+
+<script>
+    // Global chart objects
+    let dailySalesChart;
+    let topProductsChart;
+    let categorySalesChart;
+    
+    // Color palettes for charts
+    const backgroundColors = [
+        'rgba(54, 162, 235, 0.6)',
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(255, 159, 64, 0.6)',
+        'rgba(153, 102, 255, 0.6)',
+        'rgba(255, 205, 86, 0.6)',
+        'rgba(201, 203, 207, 0.6)',
+        'rgba(255, 99, 71, 0.6)',
+        'rgba(50, 205, 50, 0.6)',
+        'rgba(138, 43, 226, 0.6)'
+    ];
+    
+    const borderColors = [
+        'rgb(54, 162, 235)',
+        'rgb(255, 99, 132)',
+        'rgb(75, 192, 192)',
+        'rgb(255, 159, 64)',
+        'rgb(153, 102, 255)',
+        'rgb(255, 205, 86)',
+        'rgb(201, 203, 207)',
+        'rgb(255, 99, 71)',
+        'rgb(50, 205, 50)',
+        'rgb(138, 43, 226)'
+    ];
+
+    // Populate years dropdown (current year and 5 years back)
+    function populateYears() {
+        const yearFilter = document.getElementById('year_filter');
+        const currentYear = new Date().getFullYear();
+        
+        // Start from 5 years back
+        for (let year = currentYear - 5; year <= currentYear; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            if (year === currentYear) {
+                option.selected = true;
+            }
+            yearFilter.appendChild(option);
+        }
+    }
+    
+    // Format currency
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2
+        }).format(value);
+    }
+    
+    // Initialize charts
+    function initCharts() {
+        // Set current month in dropdown
+        const currentMonth = new Date().getMonth() + 1; // JS months are 0-indexed
+        document.getElementById('month_filter').value = currentMonth;
+        
+        // Load initial data
+        fetchAndUpdateCharts();
+        
+        // Add event listener for filter button
+        document.getElementById('apply_filter').addEventListener('click', fetchAndUpdateCharts);
+    }
+    
+    // Fetch data and update all charts
+    function fetchAndUpdateCharts() {
+        const year = document.getElementById('year_filter').value;
+        const month = document.getElementById('month_filter').value;
+        
+        // Show loading indicators (could add spinners here)
+        
+        // Fetch all chart data
+        $.ajax({
+            url: "{% url 'get-chart-data' %}",
+            method: "GET",
+            data: {
+                year: year,
+                month: month
+            },
+            dataType: "json",
+            error: err => {
+                console.log(err);
+                alert_toast("An error occurred while fetching chart data.", 'error');
+            },
+            success: function(resp) {
+                if (typeof resp == 'object') {
+                    // Update total sales display
+                    document.getElementById('total_month_sales').textContent = 
+                        'Total: ' + formatCurrency(resp.total_month_sales);
+                    
+                    // Update all charts
+                    updateDailySalesChart(resp.daily_sales);
+                    updateTopProductsChart(resp.top_products);
+                    updateCategorySalesChart(resp.category_sales);
+                } else {
+                    alert_toast("An error occurred.", 'error');
+                }
+            }
+        });
+    }
+    
+    // Update Daily Sales Line Chart
+    function updateDailySalesChart(data) {
+        const ctx = document.getElementById('dailySalesChart').getContext('2d');
+        
+        // Destroy previous chart instance if it exists
+        if (dailySalesChart) {
+            dailySalesChart.destroy();
+        }
+        
+        // Create new chart
+        dailySalesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(item => item.day),
+                datasets: [{
+                    label: 'Daily Sales Total',
+                    data: data.map(item => item.total),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointHoverRadius: 6,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return formatCurrency(context.raw);
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                }
+            }
+        });
+    }
+    
+    // Update Top Products Bar Chart
+    function updateTopProductsChart(data) {
+        const ctx = document.getElementById('topProductsChart').getContext('2d');
+        
+        // Destroy previous chart instance if it exists
+        if (topProductsChart) {
+            topProductsChart.destroy();
+        }
+        
+        // Create new chart
+        topProductsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(item => item.name),
+                datasets: [{
+                    label: 'Items Sold',
+                    data: data.map(item => item.qty),
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const index = context.dataIndex;
+                                return 'Revenue: ' + formatCurrency(data[index].total);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantity Sold'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Update Category Sales Chart
+    function updateCategorySalesChart(data) {
+        const ctx = document.getElementById('categorySalesChart').getContext('2d');
+        
+        // Destroy previous chart instance if it exists
+        if (categorySalesChart) {
+            categorySalesChart.destroy();
+        }
+        
+        // Create new chart
+        categorySalesChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.map(item => item.name),
+                datasets: [{
+                    data: data.map(item => item.count),
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const index = context.dataIndex;
+                                const percentage = (data[index].count / data.reduce((a, b) => a + b.count, 0) * 100).toFixed(1);
+                                return `${percentage}% of total`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Run when document is ready
+    $(document).ready(function() {
+        populateYears();
+        initCharts();
+    });
+</script>
+{% endblock ScriptBlock %}

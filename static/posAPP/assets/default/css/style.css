@@ -1,0 +1,71 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+
+.loader-wrapper {
+    background: #e9eaefa6 !important;
+}
+
+.mid-large {
+    width: 54vw !important;
+    max-width: unset;
+}
+
+.body-wrapper .main-wrapper .page-wrapper .content-wrapper {
+    min-height: calc(100vh - 84px - 62px) !important;
+}
+
+#POS-field {
+    height: 55vh
+}
+
+.mdc-card.info-card.info-card--primary .card-inner .card-icon-wrapper {
+    background: var(--bs-primary) !important;
+    box-shadow: 0 0 10px 5px rgb(13 110 253 / 28%);
+}
+
+.bg-primary {
+    background: var(--bs-primary) !important;
+}
+
+.text-primary {
+    color: var(--bs-primary) !important
+}
+
+.mdc-drawer {
+    background: unset;
+}
+
+.mdc-drawer__header,
+.mdc-drawer__content {
+    margin: .5em !important;
+}
+
+.mdc-list-item.mdc-drawer-item {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.brand-logo img{
+    width: 100px !important;
+    height: 100% !important;    
+}
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-image: url("../images/login-cover.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.auth-form {
+  background-color: rgba(255, 255, 255, 0.9); /* optional white overlay */
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 100%;
+}

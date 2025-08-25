@@ -1,0 +1,174 @@
+{% extends "posApp/base.html" %} {% block pageContent %}
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">Product List</h4>
+            <div class="d-flex align-items-center">
+                <div class="input-group me-3">
+                    <input type="text" class="form-control" id="product_search" placeholder="Search for products..." aria-label="Search">
+                    <button class="btn btn-outline-secondary" type="button" id="search_button"><i class="mdi mdi-magnify"></i></button>
+                </div>
+                <button class="btn btn-primary bg-gradient btn-sm rounded-pill px-4" id="create_new">
+                    <i class="mdi mdi-plus me-2"></i><span>Add New</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 mt-3">
+    <div class="mdc-card p-3">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="product-list-container">
+            {% for product in products %}
+            <div class="col product-item" data-name="{{ product.name }}" data-category="{{ product.category_id.name }}" data-code="{{ product.code }}">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-container">
+                        {% if product.category_id.name == 'Drinks' %}
+                        <img src="https://images.unsplash.com/photo-1648156253473-1154aac22425?q=80&w=435&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Product Image">
+                        {% elif product.category_id.name == 'Food' %}
+                        <img src="https://images.unsplash.com/photo-1676300185292-e23bb3db50fa?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Product Image">
+                        {% elif product.category_id.name == 'Snacks' %}
+                        <img src="https://images.unsplash.com/photo-1666190091090-1d312a4b04c2?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Product Image">
+                        {% else %}
+                        <img src="https://images.unsplash.com/photo-1628294895950-9805252327bc?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Product Image">
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1 fw-bold">{{ product.name }}</h5>
+                        <small class="text-muted mb-2">{{ product.code }} | {{ product.category_id.name }}</small>
+                        <p class="card-text text-truncate">{{ product.description }}</p>
+                        <div class="mt-auto">
+                            <span class="badge {% if product.status == 1 %}bg-success{% else %}bg-danger{% endif %} rounded-pill px-3 py-2 fw-normal mb-3">
+                                {% if product.status == 1 %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top d-flex justify-content-end">
+                        <button class="btn btn-warning btn-sm edit-data me-2" type="button" data-id="{{ product.pk }}" title="Edit">
+                            <i class="mdi mdi-pencil"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-data" type="button" data-id="{{ product.pk }}" title="Delete">
+                            <i class="mdi mdi-delete"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted py-5">
+                <p>No products found.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<script>
+    $(function() {
+        $('#create_new').click(function() {
+            uni_modal("Add New Product", "{% url 'manage_products-page' %}")
+        });
+
+        // Search functionality
+        $('#product_search').on('keyup', function() {
+            let searchTerm = $(this).val().toLowerCase();
+            $('.product-item').each(function() {
+                let card = $(this);
+                let productName = card.data('name').toLowerCase();
+                let productCategory = card.data('category').toLowerCase();
+                let productCode = card.data('code').toLowerCase();
+
+                if (productName.includes(searchTerm) || productCategory.includes(searchTerm) || productCode.includes(searchTerm)) {
+                    card.show();
+                } else {
+                    card.hide();
+                }
+            });
+        });
+
+        // Event delegation for dynamically created buttons
+        $(document).on('click', '.edit-data', function() {
+            uni_modal("Edit Product", "{% url 'manage_products-page' %}?id=" + $(this).data('id'))
+        });
+
+        $(document).on('click', '.delete-data', function() {
+            _conf("Are you sure you want to delete this Product?", "delete_product", [$(this).data('id')])
+        });
+
+        $('#uni_modal').on('shown.bs.modal', function() {
+            $('#category_id').select2({
+                placeholder: "Please Select Category Here",
+                width: '100%',
+                dropdownParent: $('#uni_modal')
+            })
+        });
+    });
+
+    function delete_product($id) {
+        start_loader();
+        $.ajax({
+            headers: {
+                "X-CSRFToken": '{{csrf_token}}'
+            },
+            url: "{% url 'delete-product' %}",
+            method: "POST",
+            data: {
+                id: $id
+            },
+            dataType: "json",
+            error: err => {
+                console.log(err)
+                alert_toast("An error occurred.", 'error');
+                end_loader();
+            },
+            success: function(resp) {
+                if (typeof resp == 'object' && resp.status == 'success') {
+                    location.reload();
+                } else {
+                    alert_toast("An error occurred.", 'error');
+                    end_loader();
+                }
+            }
+        })
+    }
+</script>
+{% endblock ScriptBlock %}
+
+{% block custom_style %}
+<style>
+    .card-img-container {
+        height: 150px;
+        overflow: hidden;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    .card-img-top {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    .card-title {
+        color: #333;
+    }
+    .card-text {
+        color: #666;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .card {
+        border-radius: 18px;
+        transition: box-shadow 0.3s ease-in-out, border 0.3s ease-in-out;
+        border: 2px solid #e4cb0a; /* Added a subtle border */
+    }
+    .card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-color: #bdbdbd; /* Slightly darker border on hover for emphasis */
+    }
+</style>
+{% endblock custom_style %}

@@ -1,0 +1,193 @@
+{% load humanize %}
+<style>
+    #uni_modal .modal-footer {
+        display: none;
+    }
+    .receipt-container {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        color: #333;
+        line-height: 1.5;
+        padding: 15px;
+        border: 1px solid #ddd;
+        max-width: 350px;
+        margin: auto;
+        background-color: #f9f9f9;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .receipt-title {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+    .receipt-info {
+        margin-bottom: 15px;
+        border-bottom: 1px dashed #ccc;
+        padding-bottom: 10px;
+    }
+    .receipt-info div span {
+        font-weight: bold;
+    }
+    .receipt-items {
+        margin-bottom: 15px;
+    }
+    .receipt-item-header, .receipt-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .receipt-item-header {
+        font-weight: bold;
+        border-bottom: 2px solid #333;
+    }
+    .item-qty, .item-amount {
+        flex: 1;
+        text-align: right;
+    }
+    .item-name {
+        flex: 2;
+        text-align: left;
+    }
+    .receipt-item-details {
+        font-size: 12px;
+        color: #666;
+    }
+    .receipt-summary {
+        border-top: 2px solid #333;
+        padding-top: 10px;
+        margin-top: 15px;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 5px 0;
+    }
+    .summary-row.subtotal, .summary-row.tax {
+        font-size: 14px;
+        font-weight: normal;
+    }
+    .summary-row.total {
+        font-size: 18px;
+        border-top: 1px dashed #ccc;
+        padding-top: 10px;
+        margin-top: 5px;
+    }
+    .receipt-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 12px;
+        color: #777;
+    }
+    .actions {
+        margin-top: 20px;
+        text-align: right;
+    }
+</style>
+<div class="container-fluid">
+    <div id="outprint" class="receipt-container">
+        <div class="receipt-header">
+            <div class="receipt-title">Kwetu Cafe</div>
+            <div><small>Unofficial Receipt</small></div>
+            <div style="margin-top: 10px;">
+                <p>Thank you for your business!</p>
+            </div>
+        </div>
+
+        <div class="receipt-info">
+            <div>
+                <span>Date:</span> {{ transaction.date_added|date:"F d, Y" }}
+            </div>
+            <div>
+                <span>Time:</span> {{ transaction.date_added|date:"h:i A" }}
+            </div>
+            <div>
+                <span>Transaction Code:</span> {{ transaction.code }}
+            </div>
+        </div>
+
+        <div class="receipt-items">
+            <div class="receipt-item-header">
+                <span class="item-name">Item</span>
+                <span class="item-qty">Qty</span>
+                <span class="item-amount">Total</span>
+            </div>
+            {% for item in salesItems %}
+            <div class="receipt-item">
+                <div class="item-name">
+                    <div>{{ item.product_id }}</div>
+                    <div class="receipt-item-details">@ {{ item.price|intcomma:True }}</div>
+                </div>
+                <div class="item-qty">{{ item.qty|intcomma:True|floatformat:0 }}</div>
+                <div class="item-amount">{{ item.total|intcomma:True|floatformat:2 }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="receipt-summary">
+            <div class="summary-row subtotal">
+                <span>Subtotal</span>
+                <span>{{ transaction.sub_total|intcomma:True|floatformat:2 }}</span>
+            </div>
+            <div class="summary-row tax">
+                <span>Tax ({{ transaction.tax|floatformat:0 }}%)</span>
+                <span>{{ transaction.tax_amount|intcomma:True|floatformat:2 }}</span>
+            </div>
+            <div class="summary-row total">
+                <span>TOTAL</span>
+                <span>{{ transaction.grand_total|intcomma:True|floatformat:2 }}</span>
+            </div>
+        </div>
+
+        <div class="receipt-summary">
+            <div class="summary-row">
+                <span>Tendered</span>
+                <span>{{ transaction.tendered_amount|intcomma:True|floatformat:2 }}</span>
+            </div>
+            <div class="summary-row total">
+                <span>Change Due</span>
+                <span>{{ transaction.amount_change|intcomma:True|floatformat:2 }}</span>
+            </div>
+        </div>
+        
+        <div class="receipt-footer">
+            <p>We appreciate your business!</p>
+        </div>
+    </div>
+    
+    <div class="actions">
+        <button class="btn btn-warning btn-sm me-1" type="button" id="receipt_print"><i class="mdi mdi-printer"></i> Print</button>
+        <button class="btn btn-danger btn-sm" type="button" data-bs-dismiss="modal"><i class="mdi mdi-close"></i> Close</button>
+    </div>
+</div>
+
+<script>
+    $(function() {
+        $('#receipt_print').click(function() {
+            var head = $('head').clone()
+            var p = $('#outprint').clone()
+            var el = $("<div>")
+            head.append('<style>body{background-color:unset !important;}</style>')
+            el.append(head)
+            el.find('title').text("Receipt - Print View")
+            el.append(p)
+            start_loader()
+            var nw = window.open('', '_blank', "width=800,height=800,left=300, top = 200")
+            nw.document.write(el.html())
+            nw.document.close()
+            setTimeout(() => {
+                nw.print()
+                setTimeout(() => {
+                    nw.close()
+                    end_loader()
+                }, 250)
+            }, 300)
+        })
+    })
+</script>

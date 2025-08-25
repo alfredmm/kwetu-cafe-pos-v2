@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if page_title %}
+    <title>{{ page_title }} | Restaurant Point Of Sale System</title>
+    {% else %}
+    <title>Restaurant Point Of Sale System</title>
+    {% endif %}
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{% static 'posAPP/assets/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'posAPP/assets/material-admin/vendors/mdi/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'posAPP/assets/material-admin/vendors/css/vendor.bundle.base.css' %}">
+    <link rel="stylesheet" href="{% static 'posAPP/assets/material-admin/css/demo/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'posAPP/assets/material-admin/images/favicon.png' %}" />
+
+    <!-- Custom styles -->
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        .bg-cover {
+            background: url("{% static 'images/cover.PNG' %}") no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-form {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-form h3 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-cover">
+        <div class="login-form mdc-card" style="outline: 2px solid #f4a460;">
+            <h3 style="font-size: large;">Point Of Sale System</h3>
+            <form id="login-user" method="POST" action="{% url 'login-user' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input class="form-control" type="text" name="username" id="username" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input class="form-control" type="password" name="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'posAPP/assets/default/js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'posAPP/assets/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'posAPP/assets/material-admin/vendors/js/vendor.bundle.base.js' %}"></script>
+    <script src="{% static 'posAPP/assets/material-admin/js/material.js' %}"></script>
+    <script src="{% static 'posAPP/assets/material-admin/js/misc.js' %}"></script>
+    <script src="{% static 'posAPP/assets/material-admin/js/dashboard.js' %}"></script>
+
+    <script>
+        $(function () {
+            $('#login-user').submit(function (e) {
+                e.preventDefault();
+                let _this = $(this);
+                $('.err-msg').remove();
+
+                let alertBox = $('<div>').addClass("alert alert-danger err-msg").hide();
+                if (!this.checkValidity()) {
+                    this.reportValidity();
+                    return false;
+                }
+
+                $.ajax({
+                    headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                    url: _this.attr('action'),
+                    data: new FormData(this),
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    method: 'POST',
+                    dataType: 'json',
+                    success: function (resp) {
+                        if (resp.status === 'success') {
+                            location.href = "{% url 'home-page' %}";
+                        } else {
+                            alertBox.text(resp.msg || "Login failed");
+                            _this.prepend(alertBox);
+                            alertBox.show('slow');
+                        }
+                    },
+                    error: function (err) {
+                        alertBox.text("An error occurred.");
+                        _this.prepend(alertBox);
+                        alertBox.show('slow');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
