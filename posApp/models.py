@@ -204,8 +204,3 @@ class MpesaTransaction(models.Model):
 
     def __str__(self):
         return f"{self.phone_number} - {self.amount} - {self.status} - {self.transaction_date}"
-<<<<<<< HEAD
-    
-=======
-    
->>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
