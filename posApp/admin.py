@@ -3,11 +3,8 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from posApp.models import Category, Products, Sales, salesItems, Employee, Department, Position, UserRole
-<<<<<<< HEAD
 from django.utils.html import format_html
 from .models import MpesaTransaction
-=======
->>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
 
 class UserRoleInline(admin.StackedInline):
     model = UserRole
@@ -24,7 +21,7 @@ class UserAdmin(BaseUserAdmin):
         if not obj:
             return list()
         return super().get_inline_instances(request, obj)
-<<<<<<< HEAD
+
 class MpesaTransactionAdmin(admin.ModelAdmin):
     list_display = ('phone_number','customer_name', 'amount', 'colored_status', 'transaction_date', 'receipt_number')
     list_filter = ('status', 'transaction_date')
@@ -41,8 +38,6 @@ class MpesaTransactionAdmin(admin.ModelAdmin):
         return format_html('<span style="color: {};">{}</span>', color, obj.status)
     
     colored_status.short_description = 'Status' # Sets the column header name in the admin list
-=======
->>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
@@ -91,9 +86,5 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Category)
 admin.site.register(Products)
 admin.site.register(Sales)
-<<<<<<< HEAD
 admin.site.register(salesItems)
 admin.site.register(MpesaTransaction, MpesaTransactionAdmin)
-=======
-admin.site.register(salesItems)
->>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
