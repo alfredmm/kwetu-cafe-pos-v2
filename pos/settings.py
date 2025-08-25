@@ -15,11 +15,19 @@ import os
 from pathlib import Path
 import django_heroku
 import dj_database_url
+<<<<<<< HEAD
 from dotenv import load_dotenv  # FIXED: Corrected import
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
+=======
+#from dotenv import load_dotenv
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+#load_dotenv(os.path.join(BASE_DIR, '.env'))
+>>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -28,16 +36,24 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+<<<<<<< HEAD
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'  # FIXED: Environment-based
 
 # FIXED: Environment-dependent security settings
 SECURE_SSL_REDIRECT = not DEBUG and os.environ.get('DJANGO_ENV') == 'production'
+=======
+DEBUG = True
+
+# Force HTTPS
+SECURE_SSL_REDIRECT = False
+>>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Security headers
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+<<<<<<< HEAD
 
 # FIXED: Only enable HSTS in production
 if not DEBUG:
@@ -48,6 +64,15 @@ if not DEBUG:
 # FIXED: Environment-dependent cookie security
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+=======
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Cookie security
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+>>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 
@@ -60,11 +85,18 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     'https://9f4c4c66ca1a.ngrok-free.app',
+<<<<<<< HEAD
     'https://kwetu-cafe-pos-27038f509873.herokuapp.com',  # ADDED: Your Heroku app
+=======
+>>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
     'http://localhost:8000',
 ]
 
 # Application definition
+<<<<<<< HEAD
+=======
+
+>>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -110,6 +142,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'pos.wsgi.application'
 
 # Database
+<<<<<<< HEAD
 # FIXED: Conditional SSL requirement
 DATABASE_CONFIG = {
     'default': os.environ.get('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
@@ -122,6 +155,15 @@ if os.environ.get('DJANGO_ENV') == 'production':
 
 DATABASES = {
     'default': dj_database_url.config(**DATABASE_CONFIG)
+=======
+# Use dj_database_url for production, fallback to sqlite3 for development
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
+        conn_max_age=600,
+        ssl_require=True
+    )
+>>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
 }
 
 # Password validation
@@ -183,5 +225,9 @@ LOGGING = {
     },
 }
 
+<<<<<<< HEAD
 # FIXED: Only apply database configuration if not using custom database setup
 django_heroku.settings(locals(), databases=False)
+=======
+django_heroku.settings(locals(), databases=False)
+>>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4

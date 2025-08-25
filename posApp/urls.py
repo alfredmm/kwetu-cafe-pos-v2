@@ -45,4 +45,8 @@ urlpatterns = [
     path('callback/', views.callback_handler, name='callback'),
     path('check-status/<str:checkout_request_id>/', views.check_transaction_status, name='check_status'),
     path('transactions/', views.transaction_list, name='transaction_list'),
+<<<<<<< HEAD
 ]
+=======
+]
+>>>>>>> adca01f7f36a66ade86f8d4e0c945103c89cc5c4
