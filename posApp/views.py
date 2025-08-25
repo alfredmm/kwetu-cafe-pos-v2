@@ -1230,4 +1230,4 @@ def transaction_list(request):
         'per_page': per_page,
     }
 
-    return render(request, 'payments/transactions.html', context)
+    return render(request, 'posApp/transactions.html', context)
