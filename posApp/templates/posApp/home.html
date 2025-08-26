@@ -70,7 +70,7 @@
     <div class="mdc-card info-card info-card--warning">
         <div class="card-inner">
             <h5 class="card-title">Today's Sales</h5>
-            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ total_sales|intcomma }}</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">Ksh {{ total_sales|intcomma }}</h5>
             <p class="tx-12 text-muted">Total Sales Today</p>
             <div class="card-icon-wrapper">
                 <i class="mdi mdi-cash-multiple"></i>
@@ -145,7 +145,7 @@
             <div class="row mt-3">
                 <div class="col-6">
                     <h6 class="text-white-75">Average Daily</h6>
-                    <h5 id="avg_daily_sales" class="text-white">KSh 0.00</h5>
+                    <h5 id="avg_daily_sales" class="text-white">Ksh 0.00</h5>
                 </div>
                 <div class="col-6">
                     <h6 class="text-white-75">Best Sales Day</h6>
@@ -239,7 +239,7 @@
     <div class="mdc-card info-card info-card--info">
         <div class="card-inner">
             <h6 class="card-title">Avg. Transaction</h6>
-            <h4 id="avg_transaction_value" class="font-weight-light text-white">KSh 0.00</h4>
+            <h4 id="avg_transaction_value" class="font-weight-light text-white">Ksh 0.00</h4>
             <p class="tx-12 text-white-50">Per transaction</p>
         </div>
     </div>
@@ -389,11 +389,9 @@
         }
     }
     
-    // Format currency
+    // Format currency - Changed from USD to KSH
     function formatCurrency(value) {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
+        return 'Ksh ' + new Intl.NumberFormat('en-US', {
             minimumFractionDigits: 2
         }).format(value);
     }
