@@ -24,3 +24,7 @@ zipp==3.21.0
 requests
 python-decouple
 python-dotenv
+boto3
+django-storages
+django-cloudinary-storage==0.3.0
+cloudinary==1.36.0
