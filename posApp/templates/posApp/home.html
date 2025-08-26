@@ -139,13 +139,13 @@
         <div class="card-inner text-center">
             <h5 class="card-title">Monthly Sales Summary</h5>
             <h3 id="total_month_sales" class="font-weight-light text-white mb-2">
-                ${{ total_month_sales|floatformat:2|default:"0.00" }}
+                Ksh.{{ total_month_sales|floatformat:2|default:"0.00" }}
             </h3>
             <p class="tx-12 text-white-50">Total sales for selected month</p>
             <div class="row mt-3">
                 <div class="col-6">
                     <h6 class="text-white-75">Average Daily</h6>
-                    <h5 id="avg_daily_sales" class="text-white">$0.00</h5>
+                    <h5 id="avg_daily_sales" class="text-white">KSh 0.00</h5>
                 </div>
                 <div class="col-6">
                     <h6 class="text-white-75">Best Sales Day</h6>
@@ -239,7 +239,7 @@
     <div class="mdc-card info-card info-card--info">
         <div class="card-inner">
             <h6 class="card-title">Avg. Transaction</h6>
-            <h4 id="avg_transaction_value" class="font-weight-light text-white">$0.00</h4>
+            <h4 id="avg_transaction_value" class="font-weight-light text-white">KSh 0.00</h4>
             <p class="tx-12 text-white-50">Per transaction</p>
         </div>
     </div>
