@@ -670,6 +670,7 @@ def manage_products(request):
 @user_passes_test(is_admin_or_manager)
 def save_product(request):
     data = request.POST
+    files = request.FILES  # Get uploaded files
     resp = {'status': 'failed'}
     id = ''
     if 'id' in data:
@@ -678,15 +679,26 @@ def save_product(request):
     category = Category.objects.filter(id=data['category_id']).first()
     
     try:
-        if (data['id']).isnumeric() and int(data['id']) > 0:
-            save_product = Products.objects.filter(id=data['id']).update(
-                category_id=category, 
-                name=data['name'], 
-                description=data['description'], 
-                price=float(data['price']),
-                status=data['status']
-            )
+        if id.isnumeric() and int(id) > 0:
+            # Update existing product
+            product = Products.objects.get(id=id)
+            product.category_id = category
+            product.name = data['name']
+            product.description = data['description']
+            product.price = float(data['price'])
+            product.status = data['status']
+            
+            # Handle image upload if provided
+            if 'image' in files:
+                # Delete old image if it exists and isn't default
+                if product.image and product.image.name != 'products/default.png':
+                    if default_storage.exists(product.image.name):
+                        default_storage.delete(product.image.name)
+                product.image = files['image']
+            
+            product.save()
         else:
+            # Create new product
             save_product = Products(
                 category_id=category, 
                 name=data['name'], 
@@ -694,6 +706,11 @@ def save_product(request):
                 price=float(data['price']),
                 status=data['status']
             )
+            
+            # Handle image upload if provided
+            if 'image' in files:
+                save_product.image = files['image']
+            
             save_product.save()
             resp['product_code'] = save_product.code
         
@@ -705,7 +722,6 @@ def save_product(request):
         resp['msg'] = str(e)
     
     return HttpResponse(json.dumps(resp), content_type="application/json")
-
 @login_required
 @user_passes_test(is_admin_or_manager)
 def delete_product(request):

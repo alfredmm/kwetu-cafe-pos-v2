@@ -43,10 +43,20 @@ class Products(models.Model):
     name = models.TextField()
     description = models.TextField()
     price = models.FloatField(default=0)
+    image = models.ImageField(
+        upload_to='products/', 
+        null=True, 
+        blank=True,
+    )
     status = models.IntegerField(default=1) 
     date_added = models.DateTimeField(default=timezone.now) 
     date_updated = models.DateTimeField(auto_now=True) 
     
+    def delete(self, *args, **kwargs):
+        """Delete the image file when product is deleted"""
+        self.image.delete()
+        super().delete(*args, **kwargs)
+
     def generate_unique_code(self):
         """Generate a unique product code"""
         while True:
