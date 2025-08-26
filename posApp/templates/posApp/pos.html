@@ -768,27 +768,22 @@
         }
     }
 
-    function handleMpesaPaymentSubmit(e) {
-        e.preventDefault();
-        
-        const phone = document.getElementById('phone').value;
-        const amount = document.getElementById('amount').value;
-        
-        if (!validatePhoneNumber(phone)) {
-            alert('Please enter a valid Kenyan phone number (e.g., 254701575328)');
-            return;
-        }
-
-        paymentData = { phone, amount };
-        showLoadingState();
-        
-        initiateMpesaPayment(phone, amount);
+   function handleMpesaPaymentSubmit(e) {
+    e.preventDefault();
+    
+    const phone = document.getElementById('phone').value.trim();
+    const amount = document.getElementById('amount').value.trim();
+    
+    // Basic empty field check only
+    if (!phone || !amount) {
+        alert('Please enter both phone number and amount');
+        return;
     }
 
-    function validatePhoneNumber(phone) {
-        const regex = /^254[17]\d{8}$/;
-        return regex.test(phone);
-    }
+    paymentData = { phone, amount };
+    showLoadingState();
+    initiateMpesaPayment(phone, amount);
+}
 
     function showLoadingState() {
         showMpesaState('loading-state');
@@ -797,51 +792,76 @@
     }
 
     function initiateMpesaPayment(phone, amount) {
-        const formData = new FormData();
-        formData.append('phone', phone);
-        formData.append('amount', amount);
-        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    const formData = new FormData();
+    formData.append('phone', phone);
+    formData.append('amount', amount);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
 
-        fetch('{% url "initiate-mpesa-payment" %}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => handleMpesaResponse(response))
-        .catch(error => handleMpesaError(error));
-    }
-
-    function handleMpesaResponse(response) {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    fetch('{% url "initiate-mpesa-payment" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest'
         }
-        
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.checkout_request_id) {
+            currentTransaction = data.checkout_request_id;
+            setTimeout(() => startStatusChecking(currentTransaction), 3000);
+        } else if (data.error) {
+            showFailedState(data.error);
+        } else {
+            showFailedState('Failed to initiate payment request');
+        }
+    })
+    .catch(error => {
+        console.error('Payment initiation error:', error);
+        showFailedState(error.message || 'Network error occurred');
+    });
+}
+/*******  1e03f06a-023e-4e9c-af38-ad9661e552b8  *******/    
+function handleMpesaResponse(response) {
+    if (!response.ok) {
         return response.json().then(data => {
-            if (data.error) {
-                showFailedState(data.error);
-                return;
-            }
-            
-            if (data.success && data.checkout_request_id) {
-                currentTransaction = data.checkout_request_id;
-                setTimeout(() => startStatusChecking(currentTransaction), 3000);
-                return;
-            }
-            
-            if (data.transaction_id) {
-                currentTransaction = data.transaction_id;
-                setTimeout(() => startStatusChecking(currentTransaction), 3000);
-            } else {
-                showFailedState('Could not initiate payment request - no transaction ID received');
-            }
+            const errorMessage = data.error || `HTTP ${response.status}: ${response.statusText}`;
+            showFailedState(errorMessage);
         }).catch(() => {
-            return response.text().then(html => handleHtmlResponse(html));
+            showFailedState(`HTTP ${response.status}: ${response.statusText}`);
         });
     }
-
+    
+    return response.json().then(data => {
+        if (data.error) {
+            showFailedState(data.error);
+            return;
+        }
+        
+        if (data.success && data.checkout_request_id) {
+            currentTransaction = data.checkout_request_id;
+            setTimeout(() => startStatusChecking(currentTransaction), 3000);
+            return;
+        }
+        
+        if (data.transaction_id) {
+            currentTransaction = data.transaction_id;
+            setTimeout(() => startStatusChecking(currentTransaction), 3000);
+        } else {
+            showFailedState('Could not initiate payment request - no transaction ID received');
+        }
+    }).catch(error => {
+        console.error('JSON parsing error:', error);
+        showFailedState('Invalid response from server');
+    });
+}
     function handleHtmlResponse(html) {
         try {
             if (html.includes('Payment Error') || html.includes('error')) {
@@ -960,13 +980,20 @@
         showMpesaState('success-state');
     }
 
-    function showFailedState(reason) {
-        document.getElementById('failed-phone').textContent = paymentData.phone;
-        document.getElementById('failed-amount').textContent = paymentData.amount;
-        document.getElementById('failure-reason').textContent = reason;
-        document.getElementById('failure-message').textContent = getFailureMessage(reason);
-        showMpesaState('failed-state');
-    }
+   function showFailedState(reason) {
+    document.getElementById('failed-phone').textContent = paymentData.phone;
+    document.getElementById('failed-amount').textContent = paymentData.amount;
+    document.getElementById('failure-reason').textContent = reason;
+    
+    // Use enhanced failure message function
+    const userFriendlyMessage = getFailureMessage(reason);
+    document.getElementById('failure-message').textContent = userFriendlyMessage;
+    
+    // Highlight error fields if it's a validation error
+    highlightErrorFields(reason);
+    
+    showMpesaState('failed-state');
+}
 
     function showCancelledState() {
         document.getElementById('cancelled-phone').textContent = paymentData.phone;
@@ -976,23 +1003,49 @@
     }
 
     function getFailureMessage(reason) {
-        const failureMessages = {
-            'Request Cancelled by user': 'You cancelled the payment on your phone.',
-            'Insufficient funds': 'You don\'t have enough money in your M-Pesa account.',
-            'Invalid phone number': 'Please check your phone number format.',
-            'Request timeout': 'The payment request timed out.'
-        };
-        return failureMessages[reason] || 'An error occurred while processing your payment.';
-    }
+    const failureMessages = {
+        'Request Cancelled by user': 'You cancelled the payment on your phone.',
+        'Insufficient funds': 'You don\'t have enough money in your M-Pesa account.',
+        'Invalid phone number': 'Please check your phone number format.',
+        'Request timeout': 'The payment request timed out.',
+        'Phone number and amount are required': 'Please fill in all required fields.',
+        'Amount must be greater than zero': 'Please enter a valid amount.',
+        'Invalid amount format': 'Please enter a valid number for the amount.',
+        'Invalid phone number format. Please enter a valid Kenyan phone number (e.g., 0701234567)': 'Please enter a valid Kenyan phone number.'
+    };
+    
+    return failureMessages[reason] || reason || 'An error occurred while processing your payment.';
+}
 
     function retryPayment() {
-        document.getElementById('phone').value = paymentData.phone;
-        document.getElementById('amount').value = paymentData.amount;
-        showMpesaState('payment-form');
-        currentTransaction = null;
-        clearInterval(statusCheckInterval);
+    // Clear any previous error states
+    document.getElementById('phone').style.borderColor = '';
+    document.getElementById('amount').style.borderColor = '';
+    
+    // Reset form with previous values
+    document.getElementById('phone').value = paymentData.phone || '';
+    document.getElementById('amount').value = paymentData.amount || '';
+    
+    showMpesaState('payment-form');
+    currentTransaction = null;
+    clearInterval(statusCheckInterval);
+    
+    // Focus on phone field for user convenience
+    document.getElementById('phone').focus();
+}
+function highlightErrorFields(errorMessage) {
+    // Reset field highlighting
+    document.getElementById('phone').style.borderColor = '';
+    document.getElementById('amount').style.borderColor = '';
+    
+    if (errorMessage.toLowerCase().includes('phone')) {
+        document.getElementById('phone').style.borderColor = '#e74c3c';
+        document.getElementById('phone').focus();
+    } else if (errorMessage.toLowerCase().includes('amount')) {
+        document.getElementById('amount').style.borderColor = '#e74c3c';
+        document.getElementById('amount').focus();
     }
-
+}
     function closeModal() {
         $('#paymentMethodModal').modal('hide');
     }
