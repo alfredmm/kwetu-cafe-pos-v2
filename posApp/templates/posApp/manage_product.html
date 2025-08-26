@@ -30,53 +30,59 @@
             background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
             color: var(--text-dark);
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
         }
         
-        .form-container {
+        .wide-form-container {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 30px;
+            padding: 35px;
             border: 4px solid var(--primary-color);
             transition: var(--transition);
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
-        .form-container:hover {
+        .wide-form-container:hover {
             box-shadow: 0 12px 35px rgba(0,0,0,0.15);
         }
         
         .form-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             position: relative;
         }
         
         .form-header:after {
             content: '';
             display: block;
-            width: 80px;
+            width: 100px;
             height: 4px;
             background: var(--primary-color);
-            margin: 10px auto;
+            margin: 15px auto;
             border-radius: 2px;
         }
         
         .form-title {
             font-weight: 700;
             color: var(--text-dark);
-            font-size: 28px;
-            margin-bottom: 5px;
+            font-size: 32px;
+            margin-bottom: 8px;
         }
         
         .form-subtitle {
             color: var(--text-light);
-            font-size: 16px;
+            font-size: 18px;
         }
         
         .form-label {
             font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 8px;
+            font-size: 17px;
+            margin-bottom: 10px;
             color: var(--text-dark);
             display: flex;
             align-items: center;
@@ -90,11 +96,12 @@
         
         .form-control, .form-select {
             border-radius: 8px;
-            padding: 12px 15px;
+            padding: 14px 16px;
             font-size: 16px;
             border: 2px solid #e0e0e0;
             transition: var(--transition);
             background-color: var(--bg-light);
+            height: auto;
         }
         
         .form-control:focus, .form-select:focus {
@@ -108,16 +115,17 @@
             font-weight: 600;
             border: 2px solid var(--primary-color);
             border-radius: 8px 0 0 8px;
+            padding: 14px 16px;
         }
         
         .image-upload-container {
             border: 2px dashed var(--primary-color);
             border-radius: var(--border-radius);
-            padding: 20px;
+            padding: 25px;
             text-align: center;
             background-color: var(--primary-light);
             transition: var(--transition);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .image-upload-container:hover {
@@ -126,7 +134,7 @@
         
         .image-preview {
             max-width: 100%;
-            max-height: 200px;
+            max-height: 220px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             border: 2px solid var(--primary-color);
@@ -134,7 +142,7 @@
         
         .image-placeholder {
             width: 100%;
-            height: 150px;
+            height: 180px;
             background-color: #f8f9fa;
             border-radius: 8px;
             display: flex;
@@ -151,29 +159,32 @@
         }
         
         .image-placeholder i {
-            font-size: 3rem;
+            font-size: 3.5rem;
             color: var(--primary-color);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .form-section {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
             border-bottom: 1px solid #eee;
         }
         
         .section-title {
             font-weight: 600;
-            font-size: 18px;
+            font-size: 20px;
             color: var(--primary-dark);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
+            padding-left: 10px;
+            border-left: 4px solid var(--primary-color);
         }
         
         .section-title i {
-            margin-right: 10px;
+            margin-right: 12px;
             color: var(--primary-color);
+            font-size: 24px;
         }
         
         .btn-primary {
@@ -181,9 +192,10 @@
             border-color: var(--primary-color);
             color: var(--text-dark);
             font-weight: 600;
-            padding: 10px 25px;
+            padding: 12px 30px;
             border-radius: 8px;
             transition: var(--transition);
+            font-size: 17px;
         }
         
         .btn-primary:hover {
@@ -197,9 +209,10 @@
             background-color: #6c757d;
             border-color: #6c757d;
             font-weight: 600;
-            padding: 10px 25px;
+            padding: 12px 30px;
             border-radius: 8px;
             transition: var(--transition);
+            font-size: 17px;
         }
         
         .btn-secondary:hover {
@@ -214,68 +227,93 @@
         }
         
         .form-text {
-            font-size: 14px;
+            font-size: 15px;
             color: var(--text-light);
             font-style: italic;
         }
         
-        .floating-label {
-            position: relative;
-            margin-bottom: 25px;
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
         }
         
-        .floating-label .form-control {
-            height: 55px;
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
             padding-top: 20px;
+            border-top: 1px solid #eee;
         }
         
-        .floating-label label {
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            font-size: 14px;
-            color: var(--text-light);
-            pointer-events: none;
-            transition: var(--transition);
-        }
-        
-        .floating-label .form-control:focus ~ label,
-        .floating-label .form-control:not(:placeholder-shown) ~ label {
-            top: -10px;
-            left: 10px;
-            font-size: 12px;
-            background: white;
-            padding: 0 5px;
-            color: var(--primary-dark);
-            font-weight: 600;
+        @media (max-width: 992px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .wide-form-container {
+                padding: 25px;
+            }
         }
         
         @media (max-width: 768px) {
-            .form-container {
+            .wide-form-container {
                 padding: 20px;
             }
             
             .form-title {
-                font-size: 24px;
+                font-size: 28px;
             }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.5);
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="form-container">
-                    <div class="form-header">
-                        <h1 class="form-title">Product Management</h1>
-                        <p class="form-subtitle">{% if product.pk %}Edit{% else %}Add New{% endif %} Product</p>
-                    </div>
-                    
-                    <form action="" id="product-form" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <input type="hidden" name="id" value="{% if product.pk %}{{product.pk}}{% endif %}">
-                        
-                        <!-- Image Upload Section -->
+    <div class="container-fluid">
+        <div class="wide-form-container">
+            <div class="form-header">
+                <h1 class="form-title">Product Management</h1>
+                <p class="form-subtitle">{% if product.pk %}Edit{% else %}Add New{% endif %} Product</p>
+            </div>
+            
+            <form action="" id="product-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{% if product.pk %}{{product.pk}}{% endif %}">
+                
+                <div class="form-grid">
+                    <!-- Image Upload Section -->
+                    <div class="full-width">
                         <div class="form-section">
                             <div class="section-title">
                                 <i class="fas fa-image"></i> Product Image
@@ -285,7 +323,7 @@
                                 <label for="image" class="form-label">Upload Product Image</label>
                                 <input type="file" name="image" id="image" class="form-control" accept="image/*" style="display: none;">
                                 
-                                <button type="button" class="btn btn-primary mb-3" onclick="document.getElementById('image').click()">
+                                <button type="button" class="upload-btn mb-4" onclick="document.getElementById('image').click()">
                                     <i class="fas fa-upload me-2"></i>Choose Image
                                 </button>
                                 
@@ -307,109 +345,109 @@
                                 <small class="form-text">Recommended size: 500x500 pixels. Max file size: 2MB</small>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Basic Information Section -->
+                    <div class="form-section full-width">
+                        <div class="section-title">
+                            <i class="fas fa-info-circle"></i> Basic Information
+                        </div>
                         
-                        <!-- Basic Information Section -->
-                        <div class="form-section">
-                            <div class="section-title">
-                                <i class="fas fa-info-circle"></i> Basic Information
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="code" class="form-label">Product Code</label>
+                                    {% if product.pk %}
+                                        <input type="text" name="code" id="code" class="form-control bg-light" 
+                                               value="{{product.code}}" readonly>
+                                    {% else %}
+                                        <input type="text" name="code" id="code" class="form-control bg-light" 
+                                               value="Auto-generated after save" readonly>
+                                    {% endif %}
+                                </div>
                             </div>
                             
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="code" class="form-label">Product Code</label>
-                                        {% if product.pk %}
-                                            <input type="text" name="code" id="code" class="form-control bg-light" 
-                                                   value="{{product.code}}" readonly>
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="category_id" class="form-label required-field">Category</label>
+                                    <select name="category_id" id="category_id" class="form-select" required>
+                                        {% if not product.category_id %}
+                                        <option value="" disabled selected>Select a category</option>
                                         {% else %}
-                                            <input type="text" name="code" id="code" class="form-control bg-light" 
-                                                   value="Auto-generated after save" readonly>
+                                        <option value="" disabled>Select a category</option>
                                         {% endif %}
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="category_id" class="form-label required-field">Category</label>
-                                        <select name="category_id" id="category_id" class="form-select" required>
-                                            {% if not product.category_id %}
-                                            <option value="" disabled selected>Select a category</option>
+                                        {% for category in categories %}
+                                            {% if product.category_id == category.id %}
+                                            <option value="{{ category.id }}" selected>{{ category.name }}</option>
                                             {% else %}
-                                            <option value="" disabled>Select a category</option>
+                                            <option value="{{ category.id }}">{{ category.name }}</option>
                                             {% endif %}
-                                            {% for category in categories %}
-                                                {% if product.category_id == category.id %}
-                                                <option value="{{ category.id }}" selected>{{ category.name }}</option>
-                                                {% else %}
-                                                <option value="{{ category.id }}">{{ category.name }}</option>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </select>
-                                    </div>
+                                        {% endfor %}
+                                    </select>
                                 </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="name" class="form-label required-field">Product Name</label>
-                                <input type="text" name="name" id="name" class="form-control" value="{% if product.name %}{{product.name}}{% endif %}" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="description" class="form-label required-field">Description</label>
-                                <textarea rows="4" name="description" id="description" class="form-control" required>{% if product.description %}{{product.description}}{% endif %}</textarea>
                             </div>
                         </div>
                         
-                        <!-- Pricing & Status Section -->
-                        <div class="form-section">
-                            <div class="section-title">
-                                <i class="fas fa-tag"></i> Pricing & Status
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="price" class="form-label required-field">Price</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">KSh</span>
-                                            <input type="number" step="0.01" min="0" name="price" id="price" class="form-control" value="{% if product.price %}{{product.price}}{% endif %}" required>
-                                        </div>
+                        <div class="mb-4">
+                            <label for="name" class="form-label required-field">Product Name</label>
+                            <input type="text" name="name" id="name" class="form-control" value="{% if product.name %}{{product.name}}{% endif %}" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="description" class="form-label required-field">Description</label>
+                            <textarea rows="4" name="description" id="description" class="form-control" required>{% if product.description %}{{product.description}}{% endif %}</textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Pricing & Status Section -->
+                    <div class="form-section full-width">
+                        <div class="section-title">
+                            <i class="fas fa-tag"></i> Pricing & Status
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="price" class="form-label required-field">Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">KSh</span>
+                                        <input type="number" step="0.01" min="0" name="price" id="price" class="form-control" value="{% if product.price %}{{product.price}}{% endif %}" required>
                                     </div>
                                 </div>
-                                
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="status" class="form-label required-field">Status</label>
-                                        <select name="status" id="status" class="form-select" required>
-                                            {% if product.status and product.status == 1 %}
-                                            <option value="1" selected>Active</option>
-                                            {% else %}
-                                            <option value="1">Active</option>
-                                            {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="status" class="form-label required-field">Status</label>
+                                    <select name="status" id="status" class="form-select" required>
+                                        {% if product.status and product.status == 1 %}
+                                        <option value="1" selected>Active</option>
+                                        {% else %}
+                                        <option value="1">Active</option>
+                                        {% endif %}
 
-                                            {% if product.status and product.status == 0 %}
-                                            <option value="0" selected>Inactive</option>
-                                            {% else %}
-                                            <option value="0">Inactive</option>
-                                            {% endif %}
-                                        </select>
-                                    </div>
+                                        {% if product.status and product.status == 0 %}
+                                        <option value="0" selected>Inactive</option>
+                                        {% else %}
+                                        <option value="0">Inactive</option>
+                                        {% endif %}
+                                    </select>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Form Actions -->
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-2"></i>Cancel
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Save Product
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+                
+                <!-- Form Actions -->
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Product
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
