@@ -23117,6 +23117,7 @@ footer .vertical-divider {
   min-height: 100vh;
 }
 
+/*
 .body-wrapper .main-wrapper .page-wrapper {
   background: #e9eaef;
 }
@@ -23125,6 +23126,7 @@ footer .vertical-divider {
   min-height: calc(100vh - 64px - 67px);
   padding: 16px 30px;
 }
+  */
 
 @media (max-width: 767px) {
   .body-wrapper .main-wrapper .page-wrapper .content-wrapper {
@@ -23132,10 +23134,11 @@ footer .vertical-divider {
   }
 }
 
+/*
 .body-wrapper .main-wrapper .page-wrapper.full-page-wrapper {
   padding-top: 0;
-  min-height: 100vh;
 }
+  */
 
 .mdc-drawer + .mdc-drawer-app-content {
   transition: margin-left .2s linear;

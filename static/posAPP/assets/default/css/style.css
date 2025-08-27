@@ -23,11 +23,6 @@ body, html {
     overflow-x: hidden;
 }
 
-/* Fix for the form shrinking issue */
-.body-wrapper .main-wrapper .page-wrapper .content-wrapper {
-    min-height: calc(100vh - 84px - 62px) !important;
-    width: 100% !important;
-}
 .loader-wrapper {
     background: #e9eaefa6 !important;
 }
@@ -35,10 +30,6 @@ body, html {
 .mid-large {
     width: 54vw !important;
     max-width: unset;
-}
-
-.body-wrapper .main-wrapper .page-wrapper .content-wrapper {
-    min-height: calc(100vh - 84px - 62px) !important;
 }
 
 #POS-field {
