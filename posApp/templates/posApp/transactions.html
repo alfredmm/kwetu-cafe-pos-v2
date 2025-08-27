@@ -1,3 +1,5 @@
+{% extends "posApp/base.html" %}
+{% block pageContent %}
 <style>
 @keyframes spin {
 from { transform: rotate(0deg); }
@@ -490,3 +492,8 @@ document.getElementById("search-btn").addEventListener("click", function() {
 });
 </script>
 </div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<!-- Additional JavaScript for transactions page can go here -->
+{% endblock ScriptBlock %}
