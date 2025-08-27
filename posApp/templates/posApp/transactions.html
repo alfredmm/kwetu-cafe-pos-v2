@@ -16,7 +16,7 @@
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 mt-3">
     <div class="mdc-card">
         <!-- Filters Section -->
-        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-3">
+        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-3 flex-wrap">
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <div class="form-group me-2 mb-2">
                     <label for="per-page" class="form-label mb-0 me-2">Transactions per page:</label>
@@ -27,17 +27,20 @@
                     </select>
                 </div>
                 
-                <div class="form-group me-2 mb-2">
+                <div class="form-group me-2 mb-2 d-flex align-items-center flex-wrap">
                     <label class="form-label mb-0 me-2">Date Range:</label>
-                    <input type="date" id="start-date" class="form-control form-control-sm me-2" value="{{ request.GET.start_date|default:'' }}" style="width: auto; display: inline-block;">
-                    <input type="date" id="end-date" class="form-control form-control-sm me-2" value="{{ request.GET.end_date|default:'' }}" style="width: auto; display: inline-block;">
-                    <button onclick="applyDateFilter()" class="btn btn-primary btn-sm me-1">Apply</button>
-                    <button onclick="resetToDefault()" class="btn btn-secondary btn-sm">Reset</button>
+                    <div class="d-flex align-items-center">
+                        <input type="date" id="start-date" class="form-control form-control-sm me-2" value="{{ request.GET.start_date|default:'' }}" style="width: auto;">
+                        <span class="me-2">to</span>
+                        <input type="date" id="end-date" class="form-control form-control-sm me-2" value="{{ request.GET.end_date|default:'' }}" style="width: auto;">
+                        <button onclick="applyDateFilter()" class="btn btn-primary btn-sm me-1">Apply</button>
+                        <button onclick="resetToDefault()" class="btn btn-secondary btn-sm">Reset</button>
+                    </div>
                 </div>
             </div>
             
-            <div class="d-flex align-items-center">
-                <div class="input-group me-2" style="width: 300px;">
+            <div class="d-flex align-items-center mb-2">
+                <div class="input-group" style="width: 300px;">
                     <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Search by phone number or status..." value="{{ request.GET.q|default:'' }}">
                     <button id="search-btn" class="btn btn-primary btn-sm" type="button">
                         <i class="mdi mdi-magnify"></i>
@@ -49,7 +52,14 @@
         <!-- Transactions Table -->
         <div class="table-responsive" id="table-container">
             {% if transactions %}
-                <table class="table table-hover table-bordered">
+                <table class="table table-hover table-bordered" style="table-layout: fixed; width: 100%;">
+                    <colgroup>
+                        <col style="width: 20%">
+                        <col style="width: 15%">
+                        <col style="width: 20%">
+                        <col style="width: 25%">
+                        <col style="width: 20%">
+                    </colgroup>
                     <thead>
                         <tr class="bg-light">
                             <th class="text-center">Phone Number</th>
@@ -62,9 +72,9 @@
                     <tbody>
                         {% for transaction in transactions %}
                         <tr>
-                            <td class="text-center">{{ transaction.phone_number }}</td>
+                            <td class="text-center text-truncate">{{ transaction.phone_number }}</td>
                             <td class="text-center">Ksh {{ transaction.amount }}</td>
-                            <td class="text-center">
+                            <td class="text-center text-truncate">
                                 {% if transaction.receipt_number %}
                                     {{ transaction.receipt_number }}
                                 {% else %}
@@ -116,6 +126,63 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Ensure proper spacing when navigation is visible */
+.mdc-layout-grid__cell--span-12 {
+    width: 100%;
+}
+
+/* Make table responsive within its container */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* Ensure table cells handle text properly */
+.table td.text-truncate {
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Adjust filter layout for smaller screens */
+@media (max-width: 992px) {
+    .d-flex.justify-content-between.align-items-center.p-3.bg-light.rounded.mb-3 {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .d-flex.align-items-center.mb-2 {
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .input-group {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-group.me-2.mb-2.d-flex.align-items-center.flex-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .form-group.me-2.mb-2.d-flex.align-items-center.flex-wrap .d-flex {
+        margin-top: 5px;
+    }
+    
+    table {
+        font-size: 0.875rem;
+    }
+    
+    .table td, .table th {
+        padding: 0.5rem;
+    }
+}
+</style>
 
 <script>
 function resetToDefault() {
