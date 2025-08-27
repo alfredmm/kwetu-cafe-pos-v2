@@ -3391,46 +3391,6 @@ svg.mdc-button__icon {
   --mdc-layout-grid-column-width-phone: 72px;
 }
 
-/* Fix for main content area width */
-    .main-wrapper {
-        width: 100%;
-    }
-
-    .page-wrapper {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .content-wrapper {
-        width: 100%;
-        padding: 0 15px;
-    }
-
-    /* Adjust the grid layout to use full width */
-    .mdc-layout-grid {
-        max-width: 100%;
-        padding: 0;
-    }
-
-    .mdc-layout-grid__inner {
-        margin: 0;
-    }
-
-    .mdc-layout-grid__cell {
-        width: 100%;
-        margin: 0;
-        padding: 0;
-    }
-
-    /* Ensure footer also uses full width */
-    footer .mdc-layout-grid {
-        max-width: 100%;
-    }
-
-    /* Adjust modal positioning */
-    .modal-dialog {
-        margin: 0 auto;
-    }
 @media (min-width: 992px) {
   .mdc-layout-grid {
     box-sizing: border-box;
@@ -23157,7 +23117,6 @@ footer .vertical-divider {
   min-height: 100vh;
 }
 
-
 .body-wrapper .main-wrapper .page-wrapper {
   background: #e9eaef;
 }
@@ -23167,18 +23126,16 @@ footer .vertical-divider {
   padding: 16px 30px;
 }
 
-
 @media (max-width: 767px) {
   .body-wrapper .main-wrapper .page-wrapper .content-wrapper {
     padding: 16px;
   }
 }
 
-/*
 .body-wrapper .main-wrapper .page-wrapper.full-page-wrapper {
   padding-top: 0;
+  min-height: 100vh;
 }
-  */
 
 .mdc-drawer + .mdc-drawer-app-content {
   transition: margin-left .2s linear;
