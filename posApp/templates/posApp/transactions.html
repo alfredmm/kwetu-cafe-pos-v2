@@ -152,12 +152,14 @@
 /* Adjust table layout for navigation toggle */
 .mdc-drawer--open + .main-wrapper .table-responsive {
     width: calc(100vh - 64px - 67px); /* Adjust based on sidebar width */
+    display: flex;
 }
 
 /* When sidebar is closed */
 .main-wrapper .table-responsive {
     width: inherit; /* Adjust based on collapsed sidebar width */
     transition: width 0.3s ease;
+    display: flex;
 }
 
 /* Adjust column widths for better fit with sidebar */
