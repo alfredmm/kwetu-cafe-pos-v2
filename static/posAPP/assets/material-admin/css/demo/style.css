@@ -23113,11 +23113,12 @@ footer .vertical-divider {
   }
 }
 
+/*
 .body-wrapper .main-wrapper {
   min-height: 100vh;
 }
 
-/*
+
 .body-wrapper .main-wrapper .page-wrapper {
   background: #e9eaef;
 }
