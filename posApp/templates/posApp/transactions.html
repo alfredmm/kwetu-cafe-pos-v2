@@ -151,18 +151,18 @@
 
 /* Adjust table layout for navigation toggle */
 .mdc-drawer--open + .main-wrapper .table-responsive {
-    width: calc(100vw - 240px); /* Adjust based on sidebar width */
+    width: calc(100vh - 64px - 67px); /* Adjust based on sidebar width */
 }
 
 /* When sidebar is closed */
 .main-wrapper .table-responsive {
-    width: calc(100vh - 64px - 67px); /* Adjust based on collapsed sidebar width */
+    width: inherit; /* Adjust based on collapsed sidebar width */
     transition: width 0.3s ease;
 }
 
 /* Adjust column widths for better fit with sidebar */
 .table {
-     /* Minimum width to maintain readability */
+    min-width: 800px; /* Minimum width to maintain readability */
 }
 
 /* Responsive adjustments for smaller screens */
