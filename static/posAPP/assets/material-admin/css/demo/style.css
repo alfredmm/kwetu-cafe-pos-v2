@@ -23153,7 +23153,6 @@ footer .vertical-divider {
   }
 }
 
-/*
 .body-wrapper .main-wrapper {
   min-height: 100vh;
 }
@@ -23167,7 +23166,7 @@ footer .vertical-divider {
   min-height: calc(100vh - 64px - 67px);
   padding: 16px 30px;
 }
-  */
+
 
 @media (max-width: 767px) {
   .body-wrapper .main-wrapper .page-wrapper .content-wrapper {
