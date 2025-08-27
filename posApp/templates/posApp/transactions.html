@@ -13,13 +13,35 @@ margin: 0;
 padding: 20px;
 color: #34495e;
 }
-.container {
-max-width: 1200px;
-margin: 0 auto;
-background-color: #ffffff;
-padding: 30px;
-border-radius: 16px;
-box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+/* Add this to your style block */
+.container-fluid {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 30px !important;
+}
+
+/* Ensure the table container takes full width */
+#table-container {
+    width: 100% !important;
+}
+
+/* Make the table responsive */
+table {
+    width: 100% !important;
+    min-width: 100% !important;
+}
+
+/* Override any conflicting width constraints from other CSS files */
+body, html {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Fix for the form shrinking issue */
+.body-wrapper .main-wrapper .page-wrapper .content-wrapper {
+    min-height: calc(100vh - 84px - 62px) !important;
+    width: 100% !important;
 }
 .header-with-button {
 display: flex;
@@ -355,8 +377,7 @@ color: #555;
 }
 </style>
 
-<div class="container">
-<div class="container">
+<div class="container-fluid">
 
   <div class="header-with-button">
     <h1>All M-Pesa Transactions</h1>
