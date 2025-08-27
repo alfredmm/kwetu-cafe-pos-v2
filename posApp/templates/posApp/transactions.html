@@ -131,12 +131,14 @@
 /* Ensure proper spacing when navigation is visible */
 .mdc-layout-grid__cell--span-12 {
     width: 100%;
+    box-sizing: border-box;
 }
 
 /* Make table responsive within its container */
 .table-responsive {
     overflow-x: auto;
     width: 100%;
+    max-width: 100%;
 }
 
 /* Ensure table cells handle text properly */
@@ -147,7 +149,33 @@
     white-space: nowrap;
 }
 
-/* Adjust filter layout for smaller screens */
+/* Adjust table layout for navigation toggle */
+.mdc-drawer--open + .main-wrapper .table-responsive {
+    width: calc(100vw - 240px); /* Adjust based on sidebar width */
+}
+
+/* When sidebar is closed */
+.main-wrapper .table-responsive {
+    width: calc(100vw - 70px); /* Adjust based on collapsed sidebar width */
+    transition: width 0.3s ease;
+}
+
+/* Adjust column widths for better fit with sidebar */
+.table {
+    min-width: 800px; /* Minimum width to maintain readability */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1200px) {
+    .mdc-drawer--open + .main-wrapper .table-responsive {
+        width: calc(100vw - 240px);
+    }
+    
+    .main-wrapper .table-responsive {
+        width: calc(100vw - 70px);
+    }
+}
+
 @media (max-width: 992px) {
     .d-flex.justify-content-between.align-items-center.p-3.bg-light.rounded.mb-3 {
         flex-direction: column;
@@ -162,6 +190,12 @@
     .input-group {
         width: 100% !important;
     }
+    
+    /* Full width on medium screens */
+    .mdc-drawer--open + .main-wrapper .table-responsive,
+    .main-wrapper .table-responsive {
+        width: 100%;
+    }
 }
 
 @media (max-width: 768px) {
@@ -172,6 +206,7 @@
     
     .form-group.me-2.mb-2.d-flex.align-items-center.flex-wrap .d-flex {
         margin-top: 5px;
+        flex-wrap: wrap;
     }
     
     table {
@@ -181,10 +216,115 @@
     .table td, .table th {
         padding: 0.5rem;
     }
+    
+    /* Adjust column widths for mobile */
+    .table colgroup col {
+        width: auto !important;
+    }
+    
+    .table {
+        table-layout: auto;
+    }
+}
+
+/* Additional adjustments for very small screens */
+@media (max-width: 576px) {
+    .mdc-card {
+        padding: 10px;
+    }
+    
+    .d-flex.justify-content-between.align-items-center.p-3.bg-light.rounded.mb-3 {
+        padding: 15px !important;
+    }
+    
+    .form-group.me-2.mb-2 {
+        margin-right: 0 !important;
+        margin-bottom: 10px !important;
+        width: 100%;
+    }
+    
+    .form-group.me-2.mb-2 select,
+    .form-group.me-2.mb-2 input {
+        width: 100% !important;
+    }
+    
+    .d-flex.align-items-center .btn {
+        margin-top: 5px;
+    }
+}
+
+/* Ensure pagination stays centered */
+.pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Fix for the main content area when navigation toggles */
+.main-wrapper {
+    transition: margin-left 0.3s ease;
+}
+
+/* Make sure the grid system adapts to sidebar changes */
+.mdc-layout-grid {
+    padding-left: 16px;
+    padding-right: 16px;
+    max-width: 100%;
+}
+
+/* Ensure the table container doesn't cause horizontal scrolling */
+#table-container {
+    overflow: hidden;
+}
+
+/* Adjust column widths for better fit with sidebar */
+@media (min-width: 993px) {
+    .table colgroup col:nth-child(1) { width: 18%; }
+    .table colgroup col:nth-child(2) { width: 12%; }
+    .table colgroup col:nth-child(3) { width: 20%; }
+    .table colgroup col:nth-child(4) { width: 25%; }
+    .table colgroup col:nth-child(5) { width: 15%; }
 }
 </style>
 
 <script>
+// Function to adjust table layout when navigation is toggled
+function adjustTableForNavigation() {
+    const drawer = document.querySelector('.mdc-drawer');
+    const tableResponsive = document.querySelector('.table-responsive');
+    
+    if (drawer && tableResponsive) {
+        // Check if navigation is open
+        if (drawer.classList.contains('mdc-drawer--open')) {
+            tableResponsive.style.width = 'calc(100vw - 240px)';
+        } else {
+            tableResponsive.style.width = 'calc(100vw - 70px)';
+        }
+    }
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', function() {
+    adjustTableForNavigation();
+    
+    // Set up a mutation observer to detect navigation toggle
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'class') {
+                adjustTableForNavigation();
+            }
+        });
+    });
+    
+    // Observe the drawer element for class changes
+    const drawer = document.querySelector('.mdc-drawer');
+    if (drawer) {
+        observer.observe(drawer, { attributes: true });
+    }
+    
+    // Also observe window resize
+    window.addEventListener('resize', adjustTableForNavigation);
+});
+
 function resetToDefault() {
     window.location.href = "/transactions";
 }
