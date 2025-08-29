@@ -303,8 +303,8 @@
     <div class="container-fluid">
         <div class="wide-form-container">
             <div class="form-header">
-                <h1 class="form-title">Product Management</h1>
-                <p class="form-subtitle">{% if product.pk %}Edit{% else %}Add New{% endif %} Product</p>
+                <h1 class="form-title">Meals Catalogue</h1>
+                <p class="form-subtitle">{% if product.pk %}Edit{% else %}Add New{% endif %} Meal</p>
             </div>
             
             <form action="" id="product-form" enctype="multipart/form-data">
@@ -316,11 +316,11 @@
                     <div class="full-width">
                         <div class="form-section">
                             <div class="section-title">
-                                <i class="fas fa-image"></i> Product Image
+                                <i class="fas fa-image"></i> Select Image
                             </div>
                             
                             <div class="image-upload-container">
-                                <label for="image" class="form-label">Upload Product Image</label>
+                                <label for="image" class="form-label">Upload Image</label>
                                 <input type="file" name="image" id="image" class="form-control" accept="image/*" style="display: none;">
                                 
                                 <button type="button" class="upload-btn mb-4" onclick="document.getElementById('image').click()">
@@ -356,7 +356,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-4">
-                                    <label for="code" class="form-label">Product Code</label>
+                                    <label for="code" class="form-label">Meal Code</label>
                                     {% if product.pk %}
                                         <input type="text" name="code" id="code" class="form-control bg-light" 
                                                value="{{product.code}}" readonly>
@@ -389,8 +389,8 @@
                         </div>
                         
                         <div class="mb-4">
-                            <label for="name" class="form-label required-field">Product Name</label>
-                            <input type="text" name="name" id="name" class="form-control" value="{% if product.name %}{{product.name}}{% endif %}" required>
+                            <label for="name" class="form-label required-field">Meal Name</label>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="Fanta Orange 300ml" value="{% if product.name %}{{product.name}}{% endif %}" required>
                         </div>
                         
                         <div class="mb-4">
