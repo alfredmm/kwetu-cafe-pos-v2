@@ -688,15 +688,23 @@ def save_product(request):
             product.price = float(data['price'])
             product.status = data['status']
             
-            # Handle image upload if provided
-            if 'image' in files:
-                # Delete old image if it exists and isn't default
-                if product.image and product.image.name != 'products/default.png':
-                    if default_storage.exists(product.image.name):
-                        default_storage.delete(product.image.name)
+            # Handle image removal if checkbox is checked
+            if 'image-clear' in data:
+                if product.image:
+                    # Delete from Cloudinary
+                    product.image.delete(save=False)
+                    product.image = None
+            
+            # Handle new image upload if provided
+            elif 'image' in files:
+                # Delete old image from Cloudinary if it exists
+                if product.image:
+                    product.image.delete(save=False)
                 product.image = files['image']
             
             product.save()
+            resp['msg'] = 'Product updated successfully.'
+            
         else:
             # Create new product
             save_product = Products(
@@ -713,6 +721,7 @@ def save_product(request):
             
             save_product.save()
             resp['product_code'] = save_product.code
+            resp['msg'] = 'Product created successfully.'
         
         resp['status'] = 'success'
         messages.success(request, 'Product Successfully saved.')
@@ -722,6 +731,7 @@ def save_product(request):
         resp['msg'] = str(e)
     
     return HttpResponse(json.dumps(resp), content_type="application/json")
+
 @login_required
 @user_passes_test(is_admin_or_manager)
 def delete_product(request):
