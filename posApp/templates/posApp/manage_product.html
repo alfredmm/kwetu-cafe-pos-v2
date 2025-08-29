@@ -372,7 +372,7 @@
                                     <label for="category_id" class="form-label required-field">Category</label>
                                     <select name="category_id" id="category_id" class="form-select" required>
                                         {% if not product.category_id %}
-                                        <option value="" disabled selected>Select a category</option>
+                                        <option value="" disabled selected>Select category</option>
                                         {% else %}
                                         <option value="" disabled>Select a category</option>
                                         {% endif %}
@@ -390,7 +390,7 @@
                         
                         <div class="mb-4">
                             <label for="name" class="form-label required-field">Meal Name</label>
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Fanta Orange 300ml" value="{% if product.name %}{{product.name}}{% endif %}" required>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="e.g. Fanta Orange 300ml" value="{% if product.name %}{{product.name}}{% endif %}" required>
                         </div>
                         
                         <div class="mb-4">
