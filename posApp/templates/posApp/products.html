@@ -21,7 +21,8 @@
 
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 mt-3">
     <div class="mdc-card p-3">
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="product-list-container">
+        <!-- Changed row-cols-lg-3 to row-cols-lg-4 for 4 products per row on large screens -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="product-list-container">
             {% for product in products %}
             <div class="col product-item" data-name="{{ product.name }}" data-category="{{ product.category_id.name }}" data-code="{{ product.code }}">
                 <div class="card h-100 shadow-sm">
@@ -141,7 +142,7 @@
 {% block custom_style %}
 <style>
     .card-img-container {
-        height: 200px; /* Fixed height for all image containers */
+        height: 180px; /* Slightly reduced height for better proportions in 4-column layout */
         overflow: hidden;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
@@ -153,7 +154,7 @@
     .product-image {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* This ensures images maintain aspect ratio while filling the container */
+        object-fit: cover;
         transition: transform 0.3s ease-in-out;
     }
     .no-image-placeholder {
@@ -171,12 +172,14 @@
     }
     .card-title {
         color: #333;
+        font-size: 0.95rem; /* Slightly smaller title for 4-column layout */
     }
     .card-text {
         color: #666;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-size: 0.85rem; /* Slightly smaller text for 4-column layout */
     }
     .card {
         border-radius: 18px;
@@ -198,6 +201,17 @@
         border: 1px solid #ddd;
         border-radius: 4px;
         padding: 5px;
+    }
+    
+    /* Adjust font sizes for better fit in 4-column layout */
+    .card-body small {
+        font-size: 0.75rem;
+    }
+    .card-body h5.text-primary {
+        font-size: 1rem;
+    }
+    .badge {
+        font-size: 0.7rem;
     }
 </style>
 {% endblock custom_style %}
